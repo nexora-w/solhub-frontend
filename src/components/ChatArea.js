@@ -475,12 +475,16 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
       trading: { name: 'TRADING', description: 'Trading discussions and market analysis' },
       nft: { name: 'NFT', description: 'NFT marketplace and collections' },
       defi: { name: 'DEFI', description: 'DeFi protocols and yield farming' },
-      announcements: { name: 'ANNOUNCEMENTS', description: 'Important updates and news' }
+      announcements: { name: 'ANNOUNCEMENTS', description: 'Important updates and news' },
+      voice1: { name: 'VOICE_CALL_#1*', description: 'Voice call channel' },
+      voice2: { name: 'VOICE_CALL_#2*', description: 'Voice call channel' },
+      voice3: { name: 'VOICE_CALL_#3*', description: 'Voice call channel' }
     };
     return channelMap[channelId] || { name: 'UNKNOWN', description: 'Unknown channel' };
   };
 
   const channelInfo = getChannelInfo(currentChannel);
+  const isVoiceCallChannel = currentChannel.startsWith('voice');
 
   return (
     <ChatContainer>
@@ -502,6 +506,20 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
 
       <MessagesContainer>
         {(() => {
+          // Show "Coming soon" message for voice call channels
+          if (isVoiceCallChannel) {
+            return (
+              <WelcomeMessage>
+                <WelcomeTitle>
+                  <span className="ansi-magenta">VOICE_CALL</span> <span className="ansi-cyan">FEATURE</span>
+                </WelcomeTitle>
+                <WelcomeSubtitle>
+                  <span className="ansi-yellow">Coming Soon!</span> Voice calling functionality is currently under development.
+                </WelcomeSubtitle>
+              </WelcomeMessage>
+            );
+          }
+
           const filteredMessages = messages.filter(message => message.channel === currentChannel);
           
           if (isLoadingMessages) {
@@ -577,38 +595,40 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
         </TypingIndicator>
       )}
 
-      <InputContainer>
-        <InputWrapper>
-          <AttachmentButton>
-            <FaPaperclip />
-          </AttachmentButton>
-          <MessageInput
-            type="text"
-            placeholder={user ? "Type a message... (Enter to send, Ctrl+Enter to broadcast)" : "Connect to start chatting..."}
-            value={messageText}
-            onChange={handleInputChange}
-            onKeyPress={handleKeyPress}
-            disabled={!user}
-          />
-          <EmojiButton>
-            <FaSmile />
-          </EmojiButton>
-          <SendButton 
-            onClick={handleSendMessage}
-            disabled={!messageText.trim() || !user}
-            title="Send to current channel (Enter)"
-          >
-            <FaPaperPlane />
-          </SendButton>
-          <BroadcastButton 
-            onClick={handleBroadcastMessage}
-            disabled={!messageText.trim() || !user}
-            title="Broadcast to all channels (Ctrl+Enter)"
-          >
-            <FaBroadcastTower />
-          </BroadcastButton>
-        </InputWrapper>
-      </InputContainer>
+      {!isVoiceCallChannel && (
+        <InputContainer>
+          <InputWrapper>
+            <AttachmentButton>
+              <FaPaperclip />
+            </AttachmentButton>
+            <MessageInput
+              type="text"
+              placeholder={user ? "Type a message... (Enter to send, Ctrl+Enter to broadcast)" : "Connect to start chatting..."}
+              value={messageText}
+              onChange={handleInputChange}
+              onKeyPress={handleKeyPress}
+              disabled={!user}
+            />
+            <EmojiButton>
+              <FaSmile />
+            </EmojiButton>
+            <SendButton 
+              onClick={handleSendMessage}
+              disabled={!messageText.trim() || !user}
+              title="Send to current channel (Enter)"
+            >
+              <FaPaperPlane />
+            </SendButton>
+            <BroadcastButton 
+              onClick={handleBroadcastMessage}
+              disabled={!messageText.trim() || !user}
+              title="Broadcast to all channels (Ctrl+Enter)"
+            >
+              <FaBroadcastTower />
+            </BroadcastButton>
+          </InputWrapper>
+        </InputContainer>
+      )}
     </ChatContainer>
   );
 }

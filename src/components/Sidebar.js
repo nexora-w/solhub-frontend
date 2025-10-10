@@ -290,7 +290,7 @@ const voiceCalls = [
   { id: 'voice3', name: 'VOICE_CALL_#3*', participants: 5 }
 ];
 
-function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ }) {
+function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, onVoiceCallClick }) {
   // Format wallet address for display
   const formatWalletAddress = (address) => {
     if (!address) return '';
@@ -350,7 +350,7 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ })
             VOICE_CALLS*
           </SectionTitle>
           {voiceCalls.map(call => (
-            <VoiceCallItem key={call.id}>
+            <VoiceCallItem key={call.id} onClick={() => onVoiceCallClick(call.id)}>
               <ChannelName>
                 <span className="ansi-magenta">&gt;</span> {call.name}
               </ChannelName>

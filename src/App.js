@@ -366,6 +366,10 @@ function App() {
     }
   };
 
+  const handleVoiceCallClick = (voiceCallId) => {
+    setCurrentChannel(voiceCallId);
+  };
+
   return (
     <AppContainer>
       <MatrixBackground id="matrixBg" />
@@ -384,6 +388,7 @@ function App() {
           onChannelChange={setCurrentChannel}
           connectedUsers={connectedUsers}
           onShowFAQ={() => setShowFAQ(true)}
+          onVoiceCallClick={handleVoiceCallClick}
         />
         <ChatArea 
           messages={messages}

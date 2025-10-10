@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { FaChevronDown, FaChevronUp, FaWallet, FaComments, FaShieldAlt, FaRocket, FaQuestionCircle, FaInfoCircle, FaTimes } from 'react-icons/fa';
+import { FaChevronDown, FaWallet, FaComments, FaShieldAlt, FaRocket, FaInfoCircle, FaTimes } from 'react-icons/fa';
 
 const ModalOverlay = styled.div`
   position: fixed;
