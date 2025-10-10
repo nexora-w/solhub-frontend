@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import ChatArea from './components/ChatArea';
+import FAQ from './components/FAQ';
 import './terminal-theme.css';
 
 const AppContainer = styled.div`
@@ -24,7 +25,7 @@ const MainContent = styled.div`
   position: relative;
   z-index: 3;
   min-height: 0;
-  margin-top: 20px;
+  margin-top: 10px;
 `;
 
 const MatrixBackground = styled.div`
@@ -67,6 +68,7 @@ function App() {
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [currentChannel, setCurrentChannel] = useState('general');
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [showFAQ, setShowFAQ] = useState(true);
 
   // Function to fetch messages for a specific channel
   const fetchMessages = async (channel) => {
@@ -374,12 +376,14 @@ function App() {
         user={user} 
         onUserLogin={handleUserLogin}
         connectedUsers={connectedUsers}
+        onShowFAQ={() => setShowFAQ(true)}
       />
       <MainContent>
         <Sidebar 
           currentChannel={currentChannel}
           onChannelChange={setCurrentChannel}
           connectedUsers={connectedUsers}
+          onShowFAQ={() => setShowFAQ(true)}
         />
         <ChatArea 
           messages={messages}
@@ -390,6 +394,10 @@ function App() {
           isLoadingMessages={isLoadingMessages}
         />
       </MainContent>
+      
+      {showFAQ && (
+        <FAQ onClose={() => setShowFAQ(false)} />
+      )}
       
       {/* Wallet Test Component - Remove in production */}
     </AppContainer>

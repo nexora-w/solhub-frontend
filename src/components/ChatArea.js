@@ -75,6 +75,7 @@ const ChannelDescription = styled.p`
 const MessagesContainer = styled.div`
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -82,12 +83,38 @@ const MessagesContainer = styled.div`
   background: var(--bg-primary);
   position: relative;
   z-index: 3;
+  
+  /* Custom scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-neon);
+    border-radius: 4px;
+    border: 1px solid var(--bg-secondary);
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--border-cyan);
+    box-shadow: 0 0 5px var(--border-cyan);
+  }
+  
+  /* Firefox scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-neon) var(--bg-secondary);
 `;
 
 const Message = styled.div`
   display: flex;
   gap: 0.75rem;
   align-items: flex-start;
+  min-height: 70px;
   background: var(--bg-elevated);
   border: 1px solid ${props => {
     if (props.$isError) return 'var(--border-error)';
@@ -541,13 +568,14 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
           ))
           );
         })()}
-        {isTyping && (
-          <TypingIndicator>
-            <span className="ansi-yellow">Someone is typing</span><span className="cursor-blink">█</span>
-          </TypingIndicator>
-        )}
         <div ref={messagesEndRef} />
       </MessagesContainer>
+
+      {isTyping && (
+        <TypingIndicator>
+          <span className="ansi-yellow">Someone is typing</span><span className="cursor-blink">█</span>
+        </TypingIndicator>
+      )}
 
       <InputContainer>
         <InputWrapper>

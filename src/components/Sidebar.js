@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { FaVolumeUp, FaHashtag, FaUsers } from 'react-icons/fa';
+import { FaVolumeUp, FaHashtag, FaUsers, FaQuestionCircle } from 'react-icons/fa';
 
 const SidebarContainer = styled.div`
   width: 280px;
@@ -14,6 +14,37 @@ const SidebarContainer = styled.div`
   box-shadow: var(--glow-cyan);
   position: relative;
   overflow: hidden;
+`;
+
+const ScrollableContent = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  
+  /* Custom scrollbar styling */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+    border-radius: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-cyan);
+    border-radius: 4px;
+    border: 1px solid var(--bg-primary);
+  }
+  
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--border-neon);
+    box-shadow: 0 0 5px var(--border-neon);
+  }
+  
+  /* Firefox scrollbar styling */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-cyan) var(--bg-primary);
 `;
 
 const TerminalHeader = styled.div`
@@ -125,7 +156,6 @@ const ChannelInfo = styled.div`
 
 const VoiceCallsSection = styled.div`
   padding: 1.5rem 1rem;
-  flex: 1;
 `;
 
 const VoiceCallItem = styled.div`
@@ -204,6 +234,48 @@ const UserAvatar = styled.div`
   box-shadow: 0 0 5px currentColor;
 `;
 
+const FAQButton = styled.div`
+  padding: 0.75rem;
+  border: 1px solid var(--border-cyan);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-elevated);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:hover {
+    border-color: var(--border-neon);
+    box-shadow: var(--glow-cyan);
+    transform: translateX(4px);
+  }
+`;
+
+const FAQButtonContent = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--fg-primary);
+  font-weight: 500;
+  font-size: 0.9rem;
+`;
+
 const channels = [
   { id: 'general', name: 'GENERAL', description: 'General discussion' },
   { id: 'trading', name: 'TRADING', description: 'Trading discussions' },
@@ -218,7 +290,7 @@ const voiceCalls = [
   { id: 'voice3', name: 'VOICE_CALL_#3*', participants: 5 }
 ];
 
-function Sidebar({ currentChannel, onChannelChange, connectedUsers }) {
+function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ }) {
   // Format wallet address for display
   const formatWalletAddress = (address) => {
     if (!address) return '';
@@ -244,61 +316,69 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers }) {
         <TerminalTitle>NAVIGATION_TERMINAL</TerminalTitle>
       </TerminalHeader>
       
-      <Section>
-        <SectionTitle>
-          <FaHashtag />
-          CHANNELS
-        </SectionTitle>
-        <ChannelList>
-          {channels.map(channel => (
-            <ChannelItem
-              key={channel.id}
-              $active={currentChannel === channel.id}
-              onClick={() => onChannelChange(channel.id)}
-            >
-              <ChannelName $active={currentChannel === channel.id}>
-                <span className="ansi-cyan">#</span>{channel.name}
+      <ScrollableContent>
+        <Section>
+          <FAQButton onClick={onShowFAQ}>
+            <FAQButtonContent>
+              <FaQuestionCircle />
+              <span>FAQ & Help</span>
+            </FAQButtonContent>
+          </FAQButton>
+          <SectionTitle>
+            <FaHashtag />
+            CHANNELS
+          </SectionTitle>
+          <ChannelList>
+            {channels.map(channel => (
+              <ChannelItem
+                key={channel.id}
+                $active={currentChannel === channel.id}
+                onClick={() => onChannelChange(channel.id)}
+              >
+                <ChannelName $active={currentChannel === channel.id}>
+                  <span className="ansi-cyan">#</span>{channel.name}
+                </ChannelName>
+                <ChannelInfo>{channel.description}</ChannelInfo>
+              </ChannelItem>
+            ))}
+          </ChannelList>
+        </Section>
+
+        <VoiceCallsSection>
+          <SectionTitle>
+            <FaVolumeUp />
+            VOICE_CALLS*
+          </SectionTitle>
+          {voiceCalls.map(call => (
+            <VoiceCallItem key={call.id}>
+              <ChannelName>
+                <span className="ansi-magenta">&gt;</span> {call.name}
               </ChannelName>
-              <ChannelInfo>{channel.description}</ChannelInfo>
-            </ChannelItem>
+              <ChannelInfo>{call.participants} participants</ChannelInfo>
+            </VoiceCallItem>
           ))}
-        </ChannelList>
-      </Section>
+        </VoiceCallsSection>
 
-      <VoiceCallsSection>
-        <SectionTitle>
-          <FaVolumeUp />
-          VOICE_CALLS*
-        </SectionTitle>
-        {voiceCalls.map(call => (
-          <VoiceCallItem key={call.id}>
-            <ChannelName>
-              <span className="ansi-magenta">&gt;</span> {call.name}
-            </ChannelName>
-            <ChannelInfo>{call.participants} participants</ChannelInfo>
-          </VoiceCallItem>
-        ))}
-      </VoiceCallsSection>
-
-      {connectedUsers.length > 0 && (
-        <OnlineUsers>
-          <OnlineUsersTitle>
-            <FaUsers />
-            ONLINE_USERS
-          </OnlineUsersTitle>
-          {connectedUsers.map(user => (
-            <UserItem key={user.id}>
-              <UserAvatar>
-                {isWalletAddress(user.username) ? 'W' : user.username.charAt(0).toUpperCase()}
-              </UserAvatar>
-              <span className="ansi-green">
-                {isWalletAddress(user.username) ? formatWalletAddress(user.username) : user.username}
-                {isWalletAddress(user.username) && <span className="ansi-cyan"> [W]</span>}
-              </span>
-            </UserItem>
-          ))}
-        </OnlineUsers>
-      )}
+        {connectedUsers.length > 0 && (
+          <OnlineUsers>
+            <OnlineUsersTitle>
+              <FaUsers />
+              ONLINE_USERS
+            </OnlineUsersTitle>
+            {connectedUsers.map(user => (
+              <UserItem key={user.id}>
+                <UserAvatar>
+                  {isWalletAddress(user.username) ? 'W' : user.username.charAt(0).toUpperCase()}
+                </UserAvatar>
+                <span className="ansi-green">
+                  {isWalletAddress(user.username) ? formatWalletAddress(user.username) : user.username}
+                  {isWalletAddress(user.username) && <span className="ansi-cyan"> [W]</span>}
+                </span>
+              </UserItem>
+            ))}
+          </OnlineUsers>
+        )}
+      </ScrollableContent>
     </SidebarContainer>
   );
 }

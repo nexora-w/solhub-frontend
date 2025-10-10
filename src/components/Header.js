@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { FaExclamationTriangle } from 'react-icons/fa';
+import { FaExclamationTriangle, FaQuestionCircle } from 'react-icons/fa';
 import { useWalletConnection } from '../hooks/useWalletConnection';
 import WalletModal from './WalletModal';
 
@@ -9,10 +9,11 @@ const HeaderContainer = styled.header`
   border: 2px solid var(--border-neon);
   border-radius: 8px;
   box-shadow: var(--glow-cyan), inset 0 1px 0 rgba(125, 211, 252, 0.1);
-  margin: 20px;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
   overflow: hidden;
   position: relative;
-  animation: terminalBoot 2s ease-out;
 `;
 
 const TerminalHeader = styled.div`
@@ -57,7 +58,7 @@ const HeaderContent = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 10px 20px;
   position: relative;
   z-index: 3;
 `;
@@ -68,7 +69,6 @@ const AsciiArt = styled.pre`
   color: var(--fg-secondary);
   text-shadow: var(--glow-cyan);
   white-space: pre;
-  animation: flicker 8s infinite;
   pointer-events: none;
   margin: 0;
 `;
@@ -161,6 +161,28 @@ const ConnectWalletButton = styled.button`
   }
 `;
 
+const FAQButton = styled.button`
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-cyan);
+  color: var(--fg-primary);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  &:hover {
+    border-color: var(--border-neon);
+    box-shadow: var(--glow-cyan);
+    transform: translateY(-1px);
+  }
+`;
+
 const WalletInfo = styled.div`
   display: flex;
   flex-direction: column;
@@ -190,12 +212,6 @@ const LoadingSpinner = styled.div`
   border: 2px solid var(--border-cyan);
   border-top: 2px solid var(--fg-primary);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
 `;
 
 const ErrorMessage = styled.div`
@@ -213,18 +229,6 @@ const ErrorMessage = styled.div`
   gap: 8px;
   box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
   z-index: 1000;
-  animation: slideIn 0.3s ease-out;
-  
-  @keyframes slideIn {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
 `;
 
 const CloseButton = styled.button`
@@ -241,7 +245,7 @@ const CloseButton = styled.button`
   }
 `;
 
-function Header({ user, onUserLogin, connectedUsers }) {
+function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
   const {
     walletAddress,
     walletBalance,
@@ -338,6 +342,10 @@ function Header({ user, onUserLogin, connectedUsers }) {
           </div>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <FAQButton onClick={onShowFAQ}>
+              <FaQuestionCircle />
+              FAQ
+            </FAQButton>
             {isConnected && walletAddress ? (
               <WalletInfo>
                 <WalletAddress>{formatAddress(walletAddress)}</WalletAddress>
