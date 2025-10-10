@@ -66,6 +66,85 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [currentChannel, setCurrentChannel] = useState('general');
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
+  // Function to fetch messages for a specific channel
+  const fetchMessages = async (channel) => {
+    try {
+      setIsLoadingMessages(true);
+      const response = await fetch(`http://localhost:5000/api/messages?channel=${channel}&limit=50`);
+      if (response.ok) {
+        const channelMessages = await response.json();
+        console.log(`Fetched ${channelMessages.length} messages for channel ${channel}:`, channelMessages);
+        
+        // Update messages state, keeping messages from other channels
+        setMessages(prev => {
+          // Remove existing messages from this channel
+          const otherChannelMessages = prev.filter(msg => msg.channel !== channel);
+          // Add new messages from this channel
+          return [...otherChannelMessages, ...channelMessages];
+        });
+      } else {
+        console.error('Failed to fetch messages:', response.statusText);
+        // Show error message to user
+        setMessages(prev => {
+          const errorMessage = {
+            id: `error-${channel}-${Date.now()}`,
+            username: 'System',
+            text: `Failed to load messages for #${channel}. Please try again.`,
+            timestamp: new Date().toISOString(),
+            channel: channel,
+            isError: true
+          };
+          const otherChannelMessages = prev.filter(msg => msg.channel !== channel && !msg.isError);
+          return [...otherChannelMessages, errorMessage];
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      // Show error message to user
+      setMessages(prev => {
+        const errorMessage = {
+          id: `error-${channel}-${Date.now()}`,
+          username: 'System',
+          text: `Network error loading messages for #${channel}. Please check your connection.`,
+          timestamp: new Date().toISOString(),
+          channel: channel,
+          isError: true
+        };
+        const otherChannelMessages = prev.filter(msg => msg.channel !== channel && !msg.isError);
+        return [...otherChannelMessages, errorMessage];
+      });
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  };
+
+  // Function to fetch all messages for all channels
+  const fetchAllMessages = async () => {
+    try {
+      setIsLoadingMessages(true);
+      const response = await fetch('http://localhost:5000/api/messages/all?limit=50');
+      if (response.ok) {
+        const allMessages = await response.json();
+        console.log('Fetched all messages:', allMessages);
+        
+        // Flatten all messages into a single array
+        const flattenedMessages = [];
+        Object.keys(allMessages).forEach(channel => {
+          flattenedMessages.push(...allMessages[channel]);
+        });
+        
+        setMessages(flattenedMessages);
+      } else {
+        console.error('Failed to fetch all messages:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error fetching all messages:', error);
+    } finally {
+      setIsLoadingMessages(false);
+    }
+  };
 
   useEffect(() => {
     // Initialize socket connection
@@ -130,6 +209,18 @@ function App() {
       newSocket.close();
     };
   }, []);
+
+  // Fetch messages when component mounts
+  useEffect(() => {
+    fetchAllMessages();
+  }, []);
+
+  // Fetch messages when channel changes
+  useEffect(() => {
+    if (currentChannel) {
+      fetchMessages(currentChannel);
+    }
+  }, [currentChannel]);
 
   // Matrix rain effect
   useEffect(() => {
@@ -296,6 +387,7 @@ function App() {
           onBroadcastMessage={handleBroadcastMessage}
           user={user}
           currentChannel={currentChannel}
+          isLoadingMessages={isLoadingMessages}
         />
       </MainContent>
       

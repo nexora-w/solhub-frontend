@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import { useWalletConnection } from '../hooks/useWalletConnection';
+import WalletModal from './WalletModal';
 
 const HeaderContainer = styled.header`
   background: var(--bg-secondary);
@@ -248,9 +249,16 @@ function Header({ user, onUserLogin, connectedUsers }) {
     isConnecting,
     error,
     connectWallet,
+    connectToWallet,
     disconnectWallet,
     formatAddress,
-    clearError
+    clearError,
+    debugWalletStatus,
+    currentWallet,
+    availableWallets,
+    isModalOpen,
+    openWalletModal,
+    closeWalletModal
   } = useWalletConnection();
 
   // Track last sent user data to prevent duplicate sends
@@ -285,6 +293,15 @@ function Header({ user, onUserLogin, connectedUsers }) {
   const handleConnectWallet = async () => {
     try {
       await connectWallet();
+    } catch (error) {
+      console.error('Wallet connection failed:', error);
+    }
+  };
+
+  // Handle wallet selection from modal
+  const handleWalletSelect = async (wallet) => {
+    try {
+      await connectToWallet(wallet);
     } catch (error) {
       console.error('Wallet connection failed:', error);
     }
@@ -325,6 +342,11 @@ function Header({ user, onUserLogin, connectedUsers }) {
               <WalletInfo>
                 <WalletAddress>{formatAddress(walletAddress)}</WalletAddress>
                 <WalletBalance>{walletBalance} SOL</WalletBalance>
+                {currentWallet && (
+                  <div style={{ fontSize: '8px', color: 'var(--fg-muted)', marginTop: '2px' }}>
+                    {currentWallet.name}
+                  </div>
+                )}
               </WalletInfo>
             ) : null}
             <ConnectWalletButton 
@@ -335,6 +357,8 @@ function Header({ user, onUserLogin, connectedUsers }) {
                 <LoadingSpinner />
               ) : isConnected ? (
                 'Disconnect'
+              ) : availableWallets.length > 0 ? (
+                `Connect ${availableWallets[0].name}`
               ) : (
                 'Connect Wallet'
               )}
@@ -350,6 +374,15 @@ function Header({ user, onUserLogin, connectedUsers }) {
           <CloseButton onClick={clearError}>×</CloseButton>
         </ErrorMessage>
       )}
+
+      <WalletModal
+        isOpen={isModalOpen}
+        onClose={closeWalletModal}
+        availableWallets={availableWallets}
+        onSelectWallet={handleWalletSelect}
+        isConnecting={isConnecting}
+        error={error}
+      />
     </>
   );
 }

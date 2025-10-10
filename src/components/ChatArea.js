@@ -90,12 +90,14 @@ const Message = styled.div`
   align-items: flex-start;
   background: var(--bg-elevated);
   border: 1px solid ${props => {
+    if (props.$isError) return 'var(--border-error)';
     if (props.$isTemporary) return 'var(--border-warning)';
     return props.$isBroadcast ? 'var(--border-magenta)' : 'var(--border-cyan)';
   }};
   border-radius: 4px;
   padding: 12px;
   border-left: 3px solid ${props => {
+    if (props.$isError) return 'var(--border-error)';
     if (props.$isTemporary) return 'var(--border-warning)';
     return props.$isBroadcast ? 'var(--border-magenta)' : 'var(--border-neon)';
   }};
@@ -121,10 +123,12 @@ const Message = styled.div`
 
   &:hover {
     border-color: ${props => {
+      if (props.$isError) return 'var(--border-error)';
       if (props.$isTemporary) return 'var(--border-warning)';
       return props.$isBroadcast ? 'var(--border-magenta)' : 'var(--border-neon)';
     }};
     box-shadow: ${props => {
+      if (props.$isError) return 'var(--glow-red)';
       if (props.$isTemporary) return 'var(--glow-yellow)';
       return props.$isBroadcast ? 'var(--glow-magenta)' : 'var(--glow-green)';
     }};
@@ -333,7 +337,30 @@ const TypingIndicator = styled.div`
   font-family: inherit;
 `;
 
-function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel }) {
+const LoadingIndicator = styled.div`
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  font-family: inherit;
+`;
+
+const LoadingSpinner = styled.div`
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-cyan);
+  border-radius: 50%;
+  border-top-color: var(--fg-primary);
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 0.5rem;
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+`;
+
+function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages }) {
   const [messageText, setMessageText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
@@ -450,6 +477,15 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
         {(() => {
           const filteredMessages = messages.filter(message => message.channel === currentChannel);
           
+          if (isLoadingMessages) {
+            return (
+              <LoadingIndicator>
+                <LoadingSpinner />
+                <span className="ansi-cyan">LOADING MESSAGES</span> <span className="ansi-yellow">FOR #{channelInfo.name}...</span>
+              </LoadingIndicator>
+            );
+          }
+          
           return filteredMessages.length === 0 ? (
             <WelcomeMessage>
               <WelcomeTitle>
@@ -461,25 +497,45 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
             </WelcomeMessage>
           ) : (
             filteredMessages.map((message) => (
-            <Message key={message.id} $isBroadcast={message.isBroadcast} $isTemporary={message.isTemporary}>
+            <Message key={message.id} $isBroadcast={message.isBroadcast} $isTemporary={message.isTemporary} $isError={message.isError}>
               <MessageAvatar>
-                {isWalletAddress(message.username) ? 'W' : message.username.charAt(0).toUpperCase()}
+                {message.isError ? '!' : (isWalletAddress(message.username) ? 'W' : message.username.charAt(0).toUpperCase())}
               </MessageAvatar>
               <MessageContent>
                 <MessageHeader>
                   <MessageUsername>
-                    <span className={message.isBroadcast ? "ansi-magenta" : "ansi-green"}>
-                      {isWalletAddress(message.username) ? formatWalletAddress(message.username) : message.username}
-                      {isWalletAddress(message.username) && <span className="ansi-cyan"> [WALLET]</span>}
+                    <span className={message.isError ? "ansi-red" : (message.isBroadcast ? "ansi-magenta" : "ansi-green")}>
+                      {message.isError ? 'SYSTEM' : (isWalletAddress(message.username) ? formatWalletAddress(message.username) : message.username)}
+                      {isWalletAddress(message.username) && !message.isError && <span className="ansi-cyan"> [WALLET]</span>}
                       {message.isBroadcast && <span className="ansi-magenta"> [BROADCAST]</span>}
                       {message.isTemporary && <span className="ansi-yellow"> [SENDING...]</span>}
+                      {message.isError && <span className="ansi-red"> [ERROR]</span>}
                     </span>
                   </MessageUsername>
                   <MessageTime>
                     <span className="ansi-dim">[{formatTime(message.timestamp)}]</span>
                   </MessageTime>
                 </MessageHeader>
-                <MessageText>{message.text}</MessageText>
+                <MessageText className={message.isError ? "ansi-red" : ""}>
+                  {message.text}
+                  {message.isError && (
+                    <button 
+                      onClick={() => window.location.reload()} 
+                      style={{
+                        marginLeft: '10px',
+                        padding: '4px 8px',
+                        background: 'var(--bg-primary)',
+                        border: '1px solid var(--border-error)',
+                        color: 'var(--fg-primary)',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.8rem'
+                      }}
+                    >
+                      Retry
+                    </button>
+                  )}
+                </MessageText>
               </MessageContent>
             </Message>
           ))

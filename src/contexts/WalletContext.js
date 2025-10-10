@@ -41,6 +41,13 @@ export const WalletProvider = ({ children }) => {
   useEffect(() => {
     const checkWalletConnection = async () => {
       if (typeof window !== 'undefined' && window.solana?.isPhantom) {
+        // Check if user explicitly disconnected (don't auto-reconnect)
+        const wasExplicitlyDisconnected = localStorage.getItem('wallet_explicitly_disconnected');
+        if (wasExplicitlyDisconnected === 'true') {
+          console.log('Wallet was explicitly disconnected, skipping auto-reconnection');
+          return;
+        }
+
         try {
           const response = await window.solana.connect({ onlyIfTrusted: true });
           if (response.publicKey) {
@@ -86,6 +93,9 @@ export const WalletProvider = ({ children }) => {
       setWalletAddress(pubKey.toString());
       setIsConnected(true);
       
+      // Clear the explicit disconnect flag since user is connecting
+      localStorage.removeItem('wallet_explicitly_disconnected');
+      
       await fetchBalance(pubKey);
       
       return {
@@ -112,6 +122,9 @@ export const WalletProvider = ({ children }) => {
       setWalletAddress(null);
       setWalletBalance(null);
       setIsConnected(false);
+      
+      // Set flag to prevent auto-reconnection on page refresh
+      localStorage.setItem('wallet_explicitly_disconnected', 'true');
     } catch (error) {
       console.error('Failed to disconnect wallet:', error);
       throw error;
