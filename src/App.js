@@ -74,7 +74,7 @@ function App() {
   const fetchMessages = async (channel) => {
     try {
       setIsLoadingMessages(true);
-      const response = await fetch(`http://localhost:5000/api/messages?channel=${channel}&limit=50`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/messages?channel=${channel}&limit=50`);
       if (response.ok) {
         const channelMessages = await response.json();
         console.log(`Fetched ${channelMessages.length} messages for channel ${channel}:`, channelMessages);
@@ -126,7 +126,7 @@ function App() {
   const fetchAllMessages = async () => {
     try {
       setIsLoadingMessages(true);
-      const response = await fetch('http://localhost:5000/api/messages/all?limit=50');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/messages/all?limit=50`);
       if (response.ok) {
         const allMessages = await response.json();
         console.log('Fetched all messages:', allMessages);
@@ -150,7 +150,7 @@ function App() {
 
   useEffect(() => {
     // Initialize socket connection
-    const newSocket = io('http://localhost:5000');
+    const newSocket = io(`${process.env.REACT_APP_API_URL}`);
     setSocket(newSocket);
 
     // Set up event listeners
