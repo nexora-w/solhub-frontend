@@ -786,7 +786,7 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
                 <MessageHeader>
                   <MessageUsername>
                     <span className={message.isError ? "ansi-red" : (message.isBroadcast ? "ansi-magenta" : "ansi-green")}>
-                      {message.isError ? 'SYSTEM' : formatWalletAddress(message.walletAddress || message.username)}
+                      {!message.isError && formatWalletAddress(message.walletAddress || message.username)}
                       {!message.isError && <span className="ansi-cyan"> [{(message.role || 'user').toUpperCase()}]</span>}
                       {message.isBroadcast && <span className="ansi-magenta"> [BROADCAST]</span>}
                       {message.isTemporary && <span className="ansi-yellow"> [SENDING...]</span>}
