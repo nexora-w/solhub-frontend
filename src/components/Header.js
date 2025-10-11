@@ -153,6 +153,11 @@ const ConnectWalletButton = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  height: 40px;
+  min-width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   
   &:hover {
     border-color: var(--border-neon);
@@ -174,7 +179,10 @@ const FAQButton = styled.button`
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  height: 40px;
+  min-width: 140px;
   
   &:hover {
     border-color: var(--border-neon);
@@ -183,28 +191,45 @@ const FAQButton = styled.button`
   }
 `;
 
-const WalletInfo = styled.div`
+const WalletInfo = styled.button`
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-cyan);
+  color: var(--fg-primary);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 40px;
+  min-width: 140px;
+  
+  &:hover {
+    border-color: var(--border-neon);
+    box-shadow: var(--glow-cyan);
+    transform: translateY(-1px);
+  }
 `;
 
 const WalletAddress = styled.div`
   font-size: 10px;
   color: var(--fg-secondary);
   font-family: 'Courier New', monospace;
-  background: var(--bg-elevated);
-  padding: 2px 6px;
-  border-radius: 2px;
-  border: 1px solid var(--border-cyan);
+  font-weight: 400;
 `;
 
 const WalletBalance = styled.div`
-  font-size: 10px;
+  font-size: 11px;
   color: var(--fg-primary);
-  font-weight: 500;
+  font-weight: 600;
 `;
+
 
 const LoadingSpinner = styled.div`
   width: 16px;
@@ -337,7 +362,7 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
               fontWeight: '600',
               letterSpacing: '1px'
             }}>
-              SOLHUB
+              USERHUB
             </span>
           </div>
           
@@ -350,11 +375,6 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
               <WalletInfo>
                 <WalletAddress>{formatAddress(walletAddress)}</WalletAddress>
                 <WalletBalance>{walletBalance} SOL</WalletBalance>
-                {currentWallet && (
-                  <div style={{ fontSize: '8px', color: 'var(--fg-muted)', marginTop: '2px' }}>
-                    {currentWallet.name}
-                  </div>
-                )}
               </WalletInfo>
             ) : null}
             <ConnectWalletButton 

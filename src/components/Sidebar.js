@@ -285,9 +285,9 @@ const channels = [
 ];
 
 const voiceCalls = [
-  { id: 'voice1', name: 'VOICE_CALL_#1*', participants: 3 },
-  { id: 'voice2', name: 'VOICE_CALL_#2*', participants: 1 },
-  { id: 'voice3', name: 'VOICE_CALL_#3*', participants: 5 }
+  { id: 'voice1', name: 'VOICE_CALL_#1*', participants: 0 },
+  { id: 'voice2', name: 'VOICE_CALL_#2*', participants: 0 },
+  { id: 'voice3', name: 'VOICE_CALL_#3*', participants: 0 }
 ];
 
 function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, onVoiceCallClick }) {
