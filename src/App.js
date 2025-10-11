@@ -140,6 +140,15 @@ function App() {
     setSocket(newSocket);
 
     // Set up event listeners
+    newSocket.on('userConfirmed', (userData) => {
+      console.log('User confirmed by server:', userData);
+      // Update user data with role from server
+      setUser(prevUser => ({
+        ...prevUser,
+        ...userData
+      }));
+    });
+
     newSocket.on('newMessage', (message) => {
       console.log('Received message from server:', message);
       setMessages(prev => {
@@ -288,6 +297,8 @@ function App() {
       const tempMessage = {
         id: Date.now() + Math.random(), // Temporary ID
         username: user.username,
+        walletAddress: user.walletAddress || user.username,
+        role: user.role || 'user',
         text: messageText,
         timestamp: new Date().toISOString(),
         channel: currentChannel,
@@ -371,6 +382,8 @@ function App() {
             connectedUsers={connectedUsers}
             onShowFAQ={() => setShowFAQ(true)}
             onVoiceCallClick={handleVoiceCallClick}
+            user={user}
+            socket={socket}
           />
         )}
         <ChatArea 
@@ -383,6 +396,7 @@ function App() {
           isMobile={isMobile}
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={toggleSidebar}
+          socket={socket}
         />
       </MainContent>
       

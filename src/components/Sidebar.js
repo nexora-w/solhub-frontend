@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaVolumeUp, FaHashtag, FaUsers, FaQuestionCircle } from 'react-icons/fa';
+import { FaVolumeUp, FaHashtag, FaUsers, FaQuestionCircle, FaPlus, FaTrash } from 'react-icons/fa';
+import CreateChannelModal from './CreateChannelModal';
 
 const SidebarContainer = styled.div`
   width: 280px;
@@ -151,6 +152,10 @@ const ChannelItem = styled.div`
   border-color: ${props => props.$active ? 'var(--border-neon)' : 'var(--border-cyan)'};
   position: relative;
   overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
 
   &::before {
     content: '';
@@ -186,6 +191,11 @@ const ChannelItem = styled.div`
   }
 `;
 
+const ChannelContent = styled.div`
+  flex: 1;
+  min-width: 0;
+`;
+
 const ChannelName = styled.div`
   font-weight: 500;
   color: var(--fg-primary);
@@ -196,6 +206,39 @@ const ChannelName = styled.div`
 const ChannelInfo = styled.div`
   font-size: 0.8rem;
   color: var(--fg-muted);
+`;
+
+const DeleteChannelButton = styled.button`
+  background: transparent;
+  border: 1px solid var(--fg-error);
+  color: var(--fg-error);
+  padding: 0.4rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  z-index: 1;
+  opacity: 0.7;
+
+  &:hover {
+    opacity: 1;
+    background: var(--fg-error);
+    color: var(--bg-primary);
+    box-shadow: 0 0 10px var(--fg-error);
+    transform: scale(1.1);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.3rem;
+    font-size: 0.8rem;
+  }
 `;
 
 const VoiceCallsSection = styled.div`
@@ -320,35 +363,116 @@ const FAQButtonContent = styled.div`
   font-size: 0.9rem;
 `;
 
+const CreateChannelButton = styled.button`
+  padding: 0.75rem;
+  border: 1px solid var(--border-neon);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--bg-elevated);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: var(--fg-primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+    transition: left 0.5s ease;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+
+  &:hover {
+    border-color: var(--border-neon);
+    box-shadow: var(--glow-green);
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const SectionHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+`;
+
 // API base URL - you might want to move this to a config file
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, onVoiceCallClick }) {
+function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, onVoiceCallClick, user, socket }) {
   const [channels, setChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
   const [isLoadingChannels, setIsLoadingChannels] = useState(true);
   const [isLoadingVoiceChannels, setIsLoadingVoiceChannels] = useState(true);
+  const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
 
   // Fetch channels from API
-  useEffect(() => {
-    const fetchChannels = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/channels`);
-        if (response.ok) {
-          const data = await response.json();
-          setChannels(data);
-        } else {
-          console.error('Failed to fetch channels');
-        }
-      } catch (error) {
-        console.error('Error fetching channels:', error);
-      } finally {
-        setIsLoadingChannels(false);
+  const fetchChannels = async () => {
+    try {
+      setIsLoadingChannels(true);
+      const response = await fetch(`${API_BASE_URL}/api/channels`);
+      if (response.ok) {
+        const data = await response.json();
+        setChannels(data);
+      } else {
+        console.error('Failed to fetch channels');
       }
-    };
+    } catch (error) {
+      console.error('Error fetching channels:', error);
+    } finally {
+      setIsLoadingChannels(false);
+    }
+  };
 
+  useEffect(() => {
     fetchChannels();
   }, []);
+
+  // Listen for new channel creation and deletion via socket
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleChannelCreated = (newChannel) => {
+      console.log('New channel created:', newChannel);
+      setChannels(prev => [...prev, newChannel]);
+    };
+
+    const handleChannelDeleted = (deletedChannelId) => {
+      console.log('Channel deleted:', deletedChannelId);
+      setChannels(prev => prev.filter(channel => channel._id !== deletedChannelId));
+    };
+
+    socket.on('channelCreated', handleChannelCreated);
+    socket.on('channelDeleted', handleChannelDeleted);
+
+    return () => {
+      socket.off('channelCreated', handleChannelCreated);
+      socket.off('channelDeleted', handleChannelDeleted);
+    };
+  }, [socket]);
 
   // Fetch voice channels from API
   useEffect(() => {
@@ -385,6 +509,75 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
   const isWalletAddress = (username) => {
     return username && username.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(username);
   };
+
+  const handleChannelCreated = (newChannel) => {
+    console.log('Channel created successfully:', newChannel);
+    fetchChannels(); // Refresh the channels list
+    // Optionally switch to the new channel
+    if (onChannelChange) {
+      onChannelChange(newChannel.name);
+    }
+  };
+
+  const handleCreateChannelClick = () => {
+    if (!user) {
+      alert('Please connect your wallet to create a channel');
+      return;
+    }
+    setShowCreateChannelModal(true);
+  };
+
+  const handleDeleteChannel = async (channelId, channelName, e) => {
+    e.stopPropagation(); // Prevent channel selection when clicking delete
+    
+    if (!window.confirm(`Are you sure you want to delete the channel "${channelName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/channels/${channelId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user?._id || user?.publicKey // Support both user ID formats
+        })
+      });
+
+      if (response.ok) {
+        console.log('Channel deleted successfully');
+        // Remove from local state
+        setChannels(prev => prev.filter(channel => channel._id !== channelId));
+        
+        // If the deleted channel was the current channel, switch to another channel
+        if (currentChannel === channelName) {
+          const remainingChannels = channels.filter(channel => channel._id !== channelId);
+          if (remainingChannels.length > 0 && onChannelChange) {
+            onChannelChange(remainingChannels[0].name);
+          }
+        }
+      } else {
+        const errorData = await response.json();
+        alert(errorData.error || 'Failed to delete channel');
+      }
+    } catch (error) {
+      console.error('Error deleting channel:', error);
+      alert('An error occurred while deleting the channel');
+    }
+  };
+
+  // Check if the current user owns a channel
+  const isChannelOwner = (channel) => {
+    if (!user || !channel.createdBy) return false;
+    // Support both user ID formats (MongoDB _id or Solana publicKey)
+    console.log(user);
+    
+    return channel.createdBy === user._id || 
+           channel.createdBy === user.publicKey ||
+           channel.createdBy.username === user.username;
+  };
+
   return (
     <SidebarContainer>
       <TerminalHeader>
@@ -404,10 +597,24 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
               <span>FAQ & Help</span>
             </FAQButtonContent>
           </FAQButton>
-          <SectionTitle>
-            <FaHashtag />
-            CHANNELS
-          </SectionTitle>
+          
+          <SectionHeader>
+            <SectionTitle>
+              <FaHashtag />
+              CHANNELS
+            </SectionTitle>
+          </SectionHeader>
+          
+          {user && (
+            <CreateChannelButton 
+              onClick={handleCreateChannelClick}
+              title="Create a new channel"
+            >
+              <FaPlus />
+              Create Channel
+            </CreateChannelButton>
+          )}
+
           <ChannelList>
             {isLoadingChannels ? (
               <ChannelInfo>Loading channels...</ChannelInfo>
@@ -418,10 +625,20 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
                   $active={currentChannel === channel.name}
                   onClick={() => onChannelChange(channel.name)}
                 >
-                  <ChannelName $active={currentChannel === channel.name}>
-                    <span className="ansi-cyan">#</span>{channel.name.toUpperCase()}
-                  </ChannelName>
-                  <ChannelInfo>{channel.description}</ChannelInfo>
+                  <ChannelContent>
+                    <ChannelName $active={currentChannel === channel.name}>
+                      <span className="ansi-cyan">#</span>{channel.name.toUpperCase()}
+                    </ChannelName>
+                    <ChannelInfo>{channel.description}</ChannelInfo>
+                  </ChannelContent>
+                  {isChannelOwner(channel) && (
+                    <DeleteChannelButton
+                      onClick={(e) => handleDeleteChannel(channel._id, channel.name, e)}
+                      title="Delete this channel"
+                    >
+                      <FaTrash />
+                    </DeleteChannelButton>
+                  )}
                 </ChannelItem>
               ))
             )}
@@ -467,6 +684,14 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
           </OnlineUsers>
         )}
       </ScrollableContent>
+
+      {showCreateChannelModal && (
+        <CreateChannelModal
+          onClose={() => setShowCreateChannelModal(false)}
+          onChannelCreated={handleChannelCreated}
+          user={user}
+        />
+      )}
     </SidebarContainer>
   );
 }

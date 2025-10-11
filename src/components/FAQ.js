@@ -332,7 +332,11 @@ const faqData = [
     questions: [
       {
         question: "What channels are available?",
-        answer: "SOLHUB offers several specialized channels: General (general discussion), Trading (crypto trading discussions), NFT (NFT marketplace and discussions), DeFi (DeFi protocols and strategies), and Announcements (important updates and news)."
+        answer: "SOLHUB offers several specialized channels: General (general discussion), Trading (crypto trading discussions), NFT (NFT marketplace and discussions), DeFi (DeFi protocols and strategies), and Announcements (important updates and news). Users can also create their own custom channels!"
+      },
+      {
+        question: "How can I create a new channel?",
+        answer: "Connect your wallet and click the 'Create Channel' button in the sidebar. You'll be able to name your channel and add a description. Channel names can only contain letters, numbers, and hyphens. Once created, your channel will be available to all users immediately!"
       },
       {
         question: "How do I send messages?",

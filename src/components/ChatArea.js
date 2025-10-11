@@ -537,7 +537,7 @@ const EmojiPickerContainer = styled.div`
   }
 `;
 
-function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages, isMobile, sidebarCollapsed, onToggleSidebar }) {
+function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages, isMobile, sidebarCollapsed, onToggleSidebar, socket }) {
   const [channels, setChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
   const [messageText, setMessageText] = useState('');
@@ -612,6 +612,22 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
 
     fetchChannels();
   }, []);
+
+  // Listen for new channel creation via socket
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleChannelCreated = (newChannel) => {
+      console.log('New channel created (ChatArea):', newChannel);
+      setChannels(prev => [...prev, newChannel]);
+    };
+
+    socket.on('channelCreated', handleChannelCreated);
+
+    return () => {
+      socket.off('channelCreated', handleChannelCreated);
+    };
+  }, [socket]);
 
   const handleSendMessage = () => {
     if (messageText.trim() && user) {
@@ -764,14 +780,14 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
             filteredMessages.map((message) => (
             <Message key={message.id} $isBroadcast={message.isBroadcast} $isTemporary={message.isTemporary} $isError={message.isError}>
               <MessageAvatar>
-                {message.isError ? '!' : (isWalletAddress(message.username) ? 'W' : message.username.charAt(0).toUpperCase())}
+                {message.isError ? '!' : 'W'}
               </MessageAvatar>
               <MessageContent>
                 <MessageHeader>
                   <MessageUsername>
                     <span className={message.isError ? "ansi-red" : (message.isBroadcast ? "ansi-magenta" : "ansi-green")}>
-                      {message.isError ? 'SYSTEM' : (isWalletAddress(message.username) ? formatWalletAddress(message.username) : message.username)}
-                      {isWalletAddress(message.username) && !message.isError && <span className="ansi-cyan"> [WALLET]</span>}
+                      {message.isError ? 'SYSTEM' : formatWalletAddress(message.walletAddress || message.username)}
+                      {!message.isError && <span className="ansi-cyan"> [{(message.role || 'user').toUpperCase()}]</span>}
                       {message.isBroadcast && <span className="ansi-magenta"> [BROADCAST]</span>}
                       {message.isTemporary && <span className="ansi-yellow"> [SENDING...]</span>}
                       {message.isError && <span className="ansi-red"> [ERROR]</span>}
