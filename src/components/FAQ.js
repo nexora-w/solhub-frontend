@@ -313,16 +313,20 @@ const faqData = [
     icon: <FaRocket />,
     questions: [
       {
-        question: "What is SOLHUB?",
-        answer: "SOLHUB is a decentralized communication platform built on the Solana blockchain. It combines real-time chat functionality with Web3 wallet integration, allowing users to communicate securely while maintaining their blockchain identity."
+        question: "What is USERHUB?",
+        answer: "USERHUB is your central hub for Solana projects and coins. It's a decentralized platform where you can create dedicated channels for your own projects, build and engage with your community, and promote your tokens or services. With Web3 wallet integration and real-time chat, USERHUB gives every project creator the tools to establish their presence in the Solana ecosystem."
       },
       {
         question: "How do I connect my wallet?",
-        answer: "Click the 'Connect Wallet' button in the header. SOLHUB supports popular Solana wallets like Phantom, Solflare, and others. Once connected, your wallet address becomes your unique identifier in the chat."
+        answer: "Click the 'Connect Wallet' button in the header. USERHUB supports popular Solana wallets like Phantom, Solflare, and others. Once connected, your wallet address becomes your unique identifier in the chat."
       },
       {
-        question: "Do I need SOL tokens to use SOLHUB?",
+        question: "Do I need SOL tokens to use USERHUB?",
         answer: "No, you don't need SOL tokens to chat and participate in discussions. However, having SOL in your wallet allows you to see your balance in the interface and may be required for future premium features."
+      },
+      {
+        question: "Can I use USERHUB as a hub for my own coin or project?",
+        answer: "Absolutely! That's exactly what USERHUB is built for. Create your own channel to serve as the central hub for your project, engage with your community in real-time, make announcements, and build a loyal following. Whether you're launching a memecoin, building a DeFi protocol, or creating an NFT collection, USERHUB provides the infrastructure to connect with your audience directly on the blockchain."
       }
     ]
   },
@@ -332,11 +336,11 @@ const faqData = [
     questions: [
       {
         question: "What channels are available?",
-        answer: "SOLHUB offers several specialized channels: General (general discussion), Trading (crypto trading discussions), NFT (NFT marketplace and discussions), DeFi (DeFi protocols and strategies), and Announcements (important updates and news). Users can also create their own custom channels!"
+        answer: "USERHUB features default channels like General, Trading, NFT, DeFi, and Announcements. But the real power lies in creating your own! Every project owner can establish their dedicated channel as a hub for their coin or project. This is where you build your community, share updates, and engage directly with your supporters on the Solana blockchain."
       },
       {
-        question: "How can I create a new channel?",
-        answer: "Connect your wallet and click the 'Create Channel' button in the sidebar. You'll be able to name your channel and add a description. Channel names can only contain letters, numbers, and hyphens. Once created, your channel will be available to all users immediately!"
+        question: "How can I create a channel for my project or coin?",
+        answer: "Creating your own project hub is easy! Connect your wallet and click the 'Create Channel' button in the sidebar. Give your channel a unique name (your project/coin name), add a compelling description, and your dedicated space is ready. Channel names can contain letters, numbers, and hyphens. Once created, your channel becomes instantly available to the entire USERHUB community, giving your project immediate visibility!"
       },
       {
         question: "How do I send messages?",
@@ -354,7 +358,7 @@ const faqData = [
     questions: [
       {
         question: "Is my wallet information secure?",
-        answer: "Yes, SOLHUB only reads your public wallet address and balance. We never request access to your private keys or the ability to sign transactions. Your wallet connection is handled securely through standard Web3 protocols."
+        answer: "Yes, USERHUB only reads your public wallet address and balance. We never request access to your private keys or the ability to sign transactions. Your wallet connection is handled securely through standard Web3 protocols."
       },
       {
         question: "Are my messages encrypted?",
@@ -362,7 +366,7 @@ const faqData = [
       },
       {
         question: "Can I disconnect my wallet?",
-        answer: "Absolutely! Click the 'Disconnect' button in the header at any time. This will remove your wallet connection and you can continue using SOLHUB with a temporary username if needed."
+        answer: "Absolutely! Click the 'Disconnect' button in the header at any time. This will remove your wallet connection and you can continue using USERHUB with a temporary username if needed."
       }
     ]
   },
@@ -371,16 +375,16 @@ const faqData = [
     icon: <FaInfoCircle />,
     questions: [
       {
-        question: "What blockchain does SOLHUB use?",
-        answer: "SOLHUB is built on the Solana blockchain, known for its high-speed transactions and low fees. This ensures fast, efficient communication while maintaining the benefits of blockchain technology."
+        question: "What blockchain does USERHUB use?",
+        answer: "USERHUB is built on the Solana blockchain, known for its high-speed transactions and low fees. This ensures fast, efficient communication while maintaining the benefits of blockchain technology."
       },
       {
         question: "How does the real-time chat work?",
-        answer: "SOLHUB uses WebSocket technology for real-time communication. Messages are instantly delivered to all connected users in the same channel, creating a seamless chat experience."
+        answer: "USERHUB uses WebSocket technology for real-time communication. Messages are instantly delivered to all connected users in the same channel, creating a seamless chat experience."
       },
       {
         question: "What browsers are supported?",
-        answer: "SOLHUB works on all modern browsers that support Web3 wallet extensions. We recommend Chrome, Firefox, or Brave for the best experience with wallet connectivity."
+        answer: "USERHUB works on all modern browsers that support Web3 wallet extensions. We recommend Chrome, Firefox, or Brave for the best experience with wallet connectivity."
       }
     ]
   }
@@ -416,40 +420,41 @@ function FAQ({ onClose }) {
             <TerminalDot />
             <TerminalDot />
           </TerminalDots>
-          <TerminalTitle>SOLHUB_FAQ_TERMINAL</TerminalTitle>
+          <TerminalTitle>USERHUB_FAQ_TERMINAL</TerminalTitle>
         </TerminalHeader>
 
       <FAQContent>
         <WelcomeSection>
-          <WelcomeTitle>Welcome to SOLHUB</WelcomeTitle>
-          <WelcomeSubtitle>The Future of Decentralized Communication</WelcomeSubtitle>
+          <WelcomeTitle>Welcome to USERHUB</WelcomeTitle>
+          <WelcomeSubtitle>Your Hub for Solana Projects & Coins</WelcomeSubtitle>
           <WelcomeDescription>
-            SOLHUB bridges the gap between traditional chat platforms and Web3 technology. 
-            Connect your Solana wallet to join a secure, transparent, and blockchain-powered 
-            communication network where your digital identity is truly yours.
+            USERHUB is your central hub for building, promoting, and managing your own Solana projects and coins. 
+            Create dedicated channels for your project, connect with your community, and leverage Web3 technology 
+            to grow your ecosystem. Whether you're launching a new token or building a community, USERHUB provides 
+            the platform where your project can thrive.
           </WelcomeDescription>
         </WelcomeSection>
 
         <FeatureGrid>
           <FeatureCard>
-            <FeatureIcon><FaWallet /></FeatureIcon>
-            <FeatureTitle>Wallet Integration</FeatureTitle>
+            <FeatureIcon><FaRocket /></FeatureIcon>
+            <FeatureTitle>Launch Your Project</FeatureTitle>
             <FeatureDescription>
-              Connect your Solana wallet to use your blockchain identity in chat
+              Create dedicated channels for your coins and projects with instant community access
             </FeatureDescription>
           </FeatureCard>
           <FeatureCard>
             <FeatureIcon><FaComments /></FeatureIcon>
-            <FeatureTitle>Real-time Chat</FeatureTitle>
+            <FeatureTitle>Real-time Engagement</FeatureTitle>
             <FeatureDescription>
-              Instant messaging across multiple specialized channels
+              Connect with your community instantly through Web3-powered chat
             </FeatureDescription>
           </FeatureCard>
           <FeatureCard>
-            <FeatureIcon><FaShieldAlt /></FeatureIcon>
-            <FeatureTitle>Secure & Transparent</FeatureTitle>
+            <FeatureIcon><FaWallet /></FeatureIcon>
+            <FeatureTitle>Blockchain Identity</FeatureTitle>
             <FeatureDescription>
-              Blockchain-powered security with public wallet verification
+              Wallet integration ensures transparent, verified communication with your users
             </FeatureDescription>
           </FeatureCard>
         </FeatureGrid>
