@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { FaVolumeUp, FaHashtag, FaUsers, FaQuestionCircle } from 'react-icons/fa';
 
@@ -320,21 +320,57 @@ const FAQButtonContent = styled.div`
   font-size: 0.9rem;
 `;
 
-const channels = [
-  { id: 'general', name: 'GENERAL', description: 'General discussion' },
-  { id: 'trading', name: 'TRADING', description: 'Trading discussions' },
-  { id: 'nft', name: 'NFT', description: 'NFT marketplace' },
-  { id: 'defi', name: 'DEFI', description: 'DeFi protocols' },
-  { id: 'announcements', name: 'ANNOUNCEMENTS', description: 'Important updates' }
-];
-
-const voiceCalls = [
-  { id: 'voice1', name: 'VOICE_CALL_#1*', participants: 0 },
-  { id: 'voice2', name: 'VOICE_CALL_#2*', participants: 0 },
-  { id: 'voice3', name: 'VOICE_CALL_#3*', participants: 0 }
-];
+// API base URL - you might want to move this to a config file
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, onVoiceCallClick }) {
+  const [channels, setChannels] = useState([]);
+  const [voiceChannels, setVoiceChannels] = useState([]);
+  const [isLoadingChannels, setIsLoadingChannels] = useState(true);
+  const [isLoadingVoiceChannels, setIsLoadingVoiceChannels] = useState(true);
+
+  // Fetch channels from API
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/channels`);
+        if (response.ok) {
+          const data = await response.json();
+          setChannels(data);
+        } else {
+          console.error('Failed to fetch channels');
+        }
+      } catch (error) {
+        console.error('Error fetching channels:', error);
+      } finally {
+        setIsLoadingChannels(false);
+      }
+    };
+
+    fetchChannels();
+  }, []);
+
+  // Fetch voice channels from API
+  useEffect(() => {
+    const fetchVoiceChannels = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/voice-channels`);
+        if (response.ok) {
+          const data = await response.json();
+          setVoiceChannels(data);
+        } else {
+          console.error('Failed to fetch voice channels');
+        }
+      } catch (error) {
+        console.error('Error fetching voice channels:', error);
+      } finally {
+        setIsLoadingVoiceChannels(false);
+      }
+    };
+
+    fetchVoiceChannels();
+  }, []);
+
   // Format wallet address for display
   const formatWalletAddress = (address) => {
     if (!address) return '';
@@ -373,18 +409,22 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
             CHANNELS
           </SectionTitle>
           <ChannelList>
-            {channels.map(channel => (
-              <ChannelItem
-                key={channel.id}
-                $active={currentChannel === channel.id}
-                onClick={() => onChannelChange(channel.id)}
-              >
-                <ChannelName $active={currentChannel === channel.id}>
-                  <span className="ansi-cyan">#</span>{channel.name}
-                </ChannelName>
-                <ChannelInfo>{channel.description}</ChannelInfo>
-              </ChannelItem>
-            ))}
+            {isLoadingChannels ? (
+              <ChannelInfo>Loading channels...</ChannelInfo>
+            ) : (
+              channels.map(channel => (
+                <ChannelItem
+                  key={channel._id}
+                  $active={currentChannel === channel.name}
+                  onClick={() => onChannelChange(channel.name)}
+                >
+                  <ChannelName $active={currentChannel === channel.name}>
+                    <span className="ansi-cyan">#</span>{channel.name.toUpperCase()}
+                  </ChannelName>
+                  <ChannelInfo>{channel.description}</ChannelInfo>
+                </ChannelItem>
+              ))
+            )}
           </ChannelList>
         </Section>
 
@@ -393,14 +433,18 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
             <FaVolumeUp />
             VOICE_CALLS*
           </SectionTitle>
-          {voiceCalls.map(call => (
-            <VoiceCallItem key={call.id} onClick={() => onVoiceCallClick(call.id)}>
-              <ChannelName>
-                <span className="ansi-magenta">&gt;</span> {call.name}
-              </ChannelName>
-              <ChannelInfo>{call.participants} participants</ChannelInfo>
-            </VoiceCallItem>
-          ))}
+          {isLoadingVoiceChannels ? (
+            <ChannelInfo>Loading voice channels...</ChannelInfo>
+          ) : (
+            voiceChannels.map(call => (
+              <VoiceCallItem key={call._id} onClick={() => onVoiceCallClick(call._id)}>
+                <ChannelName>
+                  <span className="ansi-magenta">&gt;</span> {call.name}
+                </ChannelName>
+                <ChannelInfo>{call.participantCount || 0} participants</ChannelInfo>
+              </VoiceCallItem>
+            ))
+          )}
         </VoiceCallsSection>
 
         {connectedUsers.length > 0 && (

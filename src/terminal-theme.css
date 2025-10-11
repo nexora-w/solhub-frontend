@@ -91,22 +91,6 @@ body::after {
   text-shadow: 0 0 3px currentColor;
 }
 
-.data-stream {
-  position: absolute;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, var(--fg-secondary) 50%, transparent 100%);
-  animation: dataStream 3s linear infinite;
-}
-
-.network-node {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: var(--fg-primary);
-  border-radius: 50%;
-  box-shadow: 0 0 10px currentColor;
-  animation: networkNodes 8s infinite ease-in-out;
-}
 
 .hologram-overlay {
   position: absolute;
@@ -211,24 +195,6 @@ body::after {
   }
 }
 
-@keyframes networkNodes {
-  0%, 100% { 
-    transform: rotate(0deg); 
-    opacity: 0.6;
-  }
-  25% { 
-    transform: rotate(90deg); 
-    opacity: 1;
-  }
-  50% { 
-    transform: rotate(180deg); 
-    opacity: 0.8;
-  }
-  75% { 
-    transform: rotate(270deg); 
-    opacity: 1;
-  }
-}
 
 .terminal-window {
   background: var(--bg-secondary);

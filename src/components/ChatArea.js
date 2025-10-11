@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { FaPaperPlane, FaSmile, FaPaperclip, FaBroadcastTower, FaBars } from 'react-icons/fa';
 import EmojiPicker from 'emoji-picker-react';
 
+// API base URL - you might want to move this to a config file
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const ChatContainer = styled.div`
   flex: 1;
   display: flex;
@@ -535,6 +538,8 @@ const EmojiPickerContainer = styled.div`
 `;
 
 function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages, isMobile, sidebarCollapsed, onToggleSidebar }) {
+  const [channels, setChannels] = useState([]);
+  const [voiceChannels, setVoiceChannels] = useState([]);
   const [messageText, setMessageText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -581,6 +586,32 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showEmojiPicker]);
+
+  // Fetch channels and voice channels from API
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        const [channelsResponse, voiceChannelsResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/channels`),
+          fetch(`${API_BASE_URL}/api/voice-channels`)
+        ]);
+
+        if (channelsResponse.ok) {
+          const channelsData = await channelsResponse.json();
+          setChannels(channelsData);
+        }
+
+        if (voiceChannelsResponse.ok) {
+          const voiceChannelsData = await voiceChannelsResponse.json();
+          setVoiceChannels(voiceChannelsData);
+        }
+      } catch (error) {
+        console.error('Error fetching channel data:', error);
+      }
+    };
+
+    fetchChannels();
+  }, []);
 
   const handleSendMessage = () => {
     if (messageText.trim() && user) {
@@ -645,21 +676,30 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
   };
 
   const getChannelInfo = (channelId) => {
-    const channelMap = {
-      general: { name: 'GENERAL', description: 'General discussion channel' },
-      trading: { name: 'TRADING', description: 'Trading discussions and market analysis' },
-      nft: { name: 'NFT', description: 'NFT marketplace and collections' },
-      defi: { name: 'DEFI', description: 'DeFi protocols and yield farming' },
-      announcements: { name: 'ANNOUNCEMENTS', description: 'Important updates and news' },
-      voice1: { name: 'VOICE_CALL_#1*', description: 'Voice call channel' },
-      voice2: { name: 'VOICE_CALL_#2*', description: 'Voice call channel' },
-      voice3: { name: 'VOICE_CALL_#3*', description: 'Voice call channel' }
-    };
-    return channelMap[channelId] || { name: 'UNKNOWN', description: 'Unknown channel' };
+    // First check if it's a voice channel
+    const voiceChannel = voiceChannels.find(vc => vc._id === channelId);
+    if (voiceChannel) {
+      return { 
+        name: voiceChannel.name, 
+        description: voiceChannel.description || 'Voice call channel' 
+      };
+    }
+
+    // Then check regular channels
+    const channel = channels.find(c => c.name === channelId);
+    if (channel) {
+      return { 
+        name: channel.name.toUpperCase(), 
+        description: channel.description || 'Channel' 
+      };
+    }
+
+    // Fallback for unknown channels
+    return { name: 'UNKNOWN', description: 'Unknown channel' };
   };
 
   const channelInfo = getChannelInfo(currentChannel);
-  const isVoiceCallChannel = currentChannel.startsWith('voice');
+  const isVoiceCallChannel = voiceChannels.some(vc => vc._id === currentChannel);
 
   return (
     <ChatContainer>

@@ -44,27 +44,6 @@ const MatrixBackground = styled.div`
   pointer-events: none;
 `;
 
-const NetworkNodes = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 1;
-  pointer-events: none;
-`;
-
-const DataStreams = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  z-index: 1;
-  pointer-events: none;
-`;
 
 function App() {
   const [socket, setSocket] = useState(null);
@@ -258,7 +237,8 @@ function App() {
         const column = document.createElement('div');
         column.className = 'matrix-column';
         column.style.left = i * 20 + 'px';
-        column.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        const duration = Math.random() * 3 + 2;
+        column.style.animationDuration = duration + 's';
         column.style.animationDelay = Math.random() * 2 + 's';
         
         let text = '';
@@ -269,47 +249,20 @@ function App() {
         
         matrixBg.appendChild(column);
         
+        // Remove column after animation completes to prevent memory leaks
         setTimeout(() => {
           if (column.parentNode) {
             column.parentNode.removeChild(column);
           }
-        }, 5000);
+        }, (duration + 2) * 1000); // Add 2 seconds buffer
       }
     };
 
-    const createNetworkNodes = () => {
-      const container = document.getElementById('networkNodes');
-      if (!container) return;
-      
-      for (let i = 0; i < 15; i++) {
-        const node = document.createElement('div');
-        node.className = 'network-node';
-        node.style.left = Math.random() * 100 + '%';
-        node.style.top = Math.random() * 100 + '%';
-        node.style.animationDelay = Math.random() * 8 + 's';
-        container.appendChild(node);
-      }
-    };
-
-    const createDataStreams = () => {
-      const container = document.getElementById('dataStreams');
-      if (!container) return;
-      
-      for (let i = 0; i < 8; i++) {
-        const stream = document.createElement('div');
-        stream.className = 'data-stream';
-        stream.style.top = Math.random() * 100 + '%';
-        stream.style.animationDelay = Math.random() * 3 + 's';
-        stream.style.animationDuration = (Math.random() * 2 + 3) + 's';
-        container.appendChild(stream);
-      }
-    };
-
+    // Create initial matrix rain
     createMatrixRain();
-    createNetworkNodes();
-    createDataStreams();
 
-    const matrixInterval = setInterval(createMatrixRain, 15000);
+    // Create new columns more frequently for continuous effect
+    const matrixInterval = setInterval(createMatrixRain, 2000);
     return () => clearInterval(matrixInterval);
   }, []);
 
@@ -398,8 +351,6 @@ function App() {
   return (
     <AppContainer>
       <MatrixBackground id="matrixBg" />
-      <NetworkNodes id="networkNodes" />
-      <DataStreams id="dataStreams" />
       
       <Header 
         user={user} 
