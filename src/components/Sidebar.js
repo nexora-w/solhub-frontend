@@ -14,6 +14,20 @@ const SidebarContainer = styled.div`
   box-shadow: var(--glow-cyan);
   position: relative;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    margin: 0 10px 10px 10px;
+    height: auto;
+    max-height: 40vh;
+    min-height: 200px;
+  }
+
+  @media (max-width: 480px) {
+    margin: 0 5px 5px 5px;
+    max-height: 35vh;
+    min-height: 180px;
+  }
 `;
 
 const ScrollableContent = styled.div`
@@ -88,6 +102,14 @@ const TerminalTitle = styled.div`
 const Section = styled.div`
   padding: 1.5rem 1rem;
   border-bottom: 1px solid var(--border-cyan);
+
+  @media (max-width: 768px) {
+    padding: 1rem 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.75rem 0.5rem;
+  }
 `;
 
 const SectionTitle = styled.h3`
@@ -101,6 +123,16 @@ const SectionTitle = styled.h3`
   align-items: center;
   gap: 0.5rem;
   text-shadow: var(--glow-cyan);
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    margin: 0 0 0.75rem 0;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+    margin: 0 0 0.5rem 0;
+  }
 `;
 
 const ChannelList = styled.div`
@@ -139,6 +171,18 @@ const ChannelItem = styled.div`
     border-color: var(--border-neon);
     box-shadow: var(--glow-cyan);
     transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.4rem;
+    min-height: 40px;
   }
 `;
 

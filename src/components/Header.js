@@ -1,8 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import styled from 'styled-components';
-import { FaExclamationTriangle, FaQuestionCircle } from 'react-icons/fa';
-import { useWalletConnection } from '../hooks/useWalletConnection';
-import WalletModal from './WalletModal';
+import React, { useEffect, useRef, useState } from "react";
+import styled from "styled-components";
+import {
+  FaExclamationTriangle,
+  FaQuestionCircle,
+  FaCheck,
+} from "react-icons/fa";
+import { useWalletConnection } from "../hooks/useWalletConnection";
+import WalletModal from "./WalletModal";
 
 const HeaderContainer = styled.header`
   background: var(--bg-secondary);
@@ -14,44 +18,16 @@ const HeaderContainer = styled.header`
   margin-right: 20px;
   overflow: hidden;
   position: relative;
-`;
 
-const TerminalHeader = styled.div`
-  background: linear-gradient(90deg, var(--bg-elevated) 0%, rgba(0, 255, 65, 0.1) 100%);
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--border-neon);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const TerminalDots = styled.div`
-  display: flex;
-  gap: 6px;
-`;
-
-const TerminalDot = styled.div`
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--fg-error);
-  box-shadow: 0 0 5px currentColor;
-  
-  &:nth-child(2) {
-    background: var(--fg-warning);
+  @media (max-width: 768px) {
+    margin: 10px;
+    margin-top: 10px;
   }
-  
-  &:nth-child(3) {
-    background: var(--fg-primary);
-  }
-`;
 
-const TerminalTitle = styled.div`
-  margin-left: 12px;
-  font-size: 12px;
-  color: var(--fg-muted);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  @media (max-width: 480px) {
+    margin: 5px;
+    margin-top: 5px;
+  }
 `;
 
 const HeaderContent = styled.div`
@@ -61,85 +37,17 @@ const HeaderContent = styled.div`
   padding: 10px 20px;
   position: relative;
   z-index: 3;
-`;
 
-const AsciiArt = styled.pre`
-  font-size: 12px;
-  line-height: 1;
-  color: var(--fg-secondary);
-  text-shadow: var(--glow-cyan);
-  white-space: pre;
-  pointer-events: none;
-  margin: 0;
-`;
-
-const HeaderLinks = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const CopyBadge = styled.div`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 26px;
-  padding: 0 8px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-neon);
-  border-radius: 2px;
-  color: var(--fg-primary);
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  box-shadow: 0 0 10px rgba(125, 211, 252, 0.15);
-  user-select: none;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: var(--glow-cyan);
-    transform: translateY(-1px);
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px 16px;
   }
-`;
 
-const HeaderLink = styled.a`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 26px;
-  padding: 0 6px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-neon);
-  border-radius: 2px;
-  color: var(--fg-primary);
-  text-decoration: none;
-  box-shadow: 0 0 10px rgba(125, 211, 252, 0.15);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: var(--glow-cyan);
-    transform: translateY(-1px);
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    gap: 8px;
   }
-`;
-
-const UserSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 16px;
-`;
-
-const NetworkStatus = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
-`;
-
-const LiveBalance = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
 `;
 
 const ConnectWalletButton = styled.button`
@@ -158,11 +66,25 @@ const ConnectWalletButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  
+
   &:hover {
     border-color: var(--border-neon);
     box-shadow: var(--glow-cyan);
     transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    min-width: 120px;
+    height: 36px;
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+
+  @media (max-width: 480px) {
+    min-width: 100px;
+    height: 32px;
+    font-size: 12px;
+    padding: 4px 8px;
   }
 `;
 
@@ -183,11 +105,25 @@ const FAQButton = styled.button`
   gap: 6px;
   height: 40px;
   min-width: 140px;
-  
+
   &:hover {
     border-color: var(--border-neon);
     box-shadow: var(--glow-cyan);
     transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    min-width: 120px;
+    height: 36px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  @media (max-width: 480px) {
+    min-width: 100px;
+    height: 32px;
+    font-size: 10px;
+    padding: 4px 8px;
   }
 `;
 
@@ -209,18 +145,32 @@ const WalletInfo = styled.button`
   gap: 2px;
   height: 40px;
   min-width: 140px;
-  
+
   &:hover {
     border-color: var(--border-neon);
     box-shadow: var(--glow-cyan);
     transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    min-width: 120px;
+    height: 36px;
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  @media (max-width: 480px) {
+    min-width: 100px;
+    height: 32px;
+    font-size: 10px;
+    padding: 4px 8px;
   }
 `;
 
 const WalletAddress = styled.div`
   font-size: 10px;
   color: var(--fg-secondary);
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   font-weight: 400;
 `;
 
@@ -230,6 +180,92 @@ const WalletBalance = styled.div`
   font-weight: 600;
 `;
 
+const ContractAddressContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 1px 8px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  flex-wrap: wrap;
+`;
+
+const ContractAddressText = styled.span`
+  color: var(--fg-muted);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: "Courier New", monospace;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    color: var(--fg-primary);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    word-break: break-all;
+    line-height: 1.2;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 11px;
+  }
+`;
+
+const ContractAddressLabel = styled.span`
+  color: var(--fg-muted);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+    color: var(--fg-secondary);
+  }
+
+  @media (max-width: 480px) {
+    font-size: 11px;
+  }
+`;
+
+const CopySuccessMessage = styled.div`
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-secondary);
+  border: 2px solid var(--fg-primary);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: var(--fg-primary);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 0 20px rgba(125, 211, 252, 0.3);
+  z-index: 1000;
+  animation: fadeInOut 2s ease-in-out;
+
+  @keyframes fadeInOut {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+    20% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    80% {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-10px);
+    }
+  }
+`;
 
 const LoadingSpinner = styled.div`
   width: 16px;
@@ -264,7 +300,7 @@ const CloseButton = styled.button`
   font-size: 16px;
   padding: 0;
   margin-left: 8px;
-  
+
   &:hover {
     opacity: 0.7;
   }
@@ -287,11 +323,27 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
     availableWallets,
     isModalOpen,
     openWalletModal,
-    closeWalletModal
+    closeWalletModal,
   } = useWalletConnection();
 
   // Track last sent user data to prevent duplicate sends
   const lastSentUserData = useRef(null);
+
+  // Copy functionality state
+  const [copySuccess, setCopySuccess] = useState(false);
+  
+  // State for responsive address display
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Handle window resize for responsive address display
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Update user data when wallet connects/disconnects
   useEffect(() => {
@@ -302,13 +354,15 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
         avatar: null,
         walletAddress: walletAddress,
         balance: parseFloat(walletBalance) || 0,
-        isWalletUser: true // Flag to identify wallet-connected users
+        isWalletUser: true, // Flag to identify wallet-connected users
       };
-      
+
       // Only send if user data has actually changed
-      if (!lastSentUserData.current || 
-          lastSentUserData.current.username !== userData.username ||
-          lastSentUserData.current.balance !== userData.balance) {
+      if (
+        !lastSentUserData.current ||
+        lastSentUserData.current.username !== userData.username ||
+        lastSentUserData.current.balance !== userData.balance
+      ) {
         lastSentUserData.current = userData;
         onUserLogin(userData);
       }
@@ -323,7 +377,7 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
     try {
       await connectWallet();
     } catch (error) {
-      console.error('Wallet connection failed:', error);
+      console.error("Wallet connection failed:", error);
     }
   };
 
@@ -332,7 +386,7 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
     try {
       await connectToWallet(wallet);
     } catch (error) {
-      console.error('Wallet connection failed:', error);
+      console.error("Wallet connection failed:", error);
     }
   };
 
@@ -341,32 +395,95 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
     try {
       await disconnectWallet();
     } catch (error) {
-      console.error('Wallet disconnection failed:', error);
+      console.error("Wallet disconnection failed:", error);
     }
+  };
+
+  // Handle copy contract address to clipboard
+  const handleCopyContractAddress = async () => {
+    const contractAddress = "7tMo5tAHNUUiD3HWpaH4XkzaKxg8pSpi8SycbZ2546Fc";
+    try {
+      await navigator.clipboard.writeText(contractAddress);
+      setCopySuccess(true);
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = contractAddress;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+    }
+  };
+
+  // Function to truncate contract address for mobile display
+  const truncateAddress = (address, startChars = 4, endChars = 4) => {
+    if (!isMobile) {
+      return address; // Show full address on desktop
+    }
+    if (address.length <= startChars + endChars) {
+      return address;
+    }
+    return `${address.slice(0, startChars)}.....${address.slice(-endChars)}`;
   };
 
   return (
     <>
       <HeaderContainer>
         <HeaderContent>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span style={{ color: 'var(--fg-muted)', fontSize: '14px', fontWeight: '500' }}>
-              CONTACT ADDRESS
-            </span>
+          <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+            <ContractAddressContainer>
+              <ContractAddressLabel>
+                CONTRACT ADDRESS:
+              </ContractAddressLabel>
+              <ContractAddressText
+                onClick={handleCopyContractAddress}
+                title="Click to copy contract address"
+              >
+                7tMo5tAHNUUiD3HWpaH4XkzaKxg8pSpi8SycbZ2546Fc
+              </ContractAddressText>
+            </ContractAddressContainer>
           </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-            <span style={{ 
-              color: 'var(--fg-primary)', 
-              fontSize: '24px', 
-              fontWeight: '600',
-              letterSpacing: '1px'
-            }}>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flex: 1,
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <span
+              style={{
+                color: "var(--fg-primary)",
+                fontSize: isMobile ? "20px" : "24px",
+                fontWeight: "600",
+                letterSpacing: "1px",
+              }}
+            >
               USERHUB
             </span>
           </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+
+          <div style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            gap: isMobile ? "8px" : "12px",
+            flexWrap: isMobile ? "wrap" : "nowrap",
+            justifyContent: isMobile ? "center" : "flex-end",
+            width: isMobile ? "100%" : "auto"
+          }}>
             <FAQButton onClick={onShowFAQ}>
               <FaQuestionCircle />
               FAQ
@@ -377,18 +494,20 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
                 <WalletBalance>{walletBalance} SOL</WalletBalance>
               </WalletInfo>
             ) : null}
-            <ConnectWalletButton 
-              onClick={isConnected ? handleDisconnectWallet : handleConnectWallet}
+            <ConnectWalletButton
+              onClick={
+                isConnected ? handleDisconnectWallet : handleConnectWallet
+              }
               disabled={isConnecting}
             >
               {isConnecting ? (
                 <LoadingSpinner />
               ) : isConnected ? (
-                'Disconnect'
+                "Disconnect"
               ) : availableWallets.length > 0 ? (
                 `Connect ${availableWallets[0].name}`
               ) : (
-                'Connect Wallet'
+                "Connect Wallet"
               )}
             </ConnectWalletButton>
           </div>
@@ -401,6 +520,13 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
           {error}
           <CloseButton onClick={clearError}>×</CloseButton>
         </ErrorMessage>
+      )}
+
+      {copySuccess && (
+        <CopySuccessMessage>
+          <FaCheck />
+          Contract address copied!
+        </CopySuccessMessage>
       )}
 
       <WalletModal

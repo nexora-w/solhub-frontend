@@ -421,4 +421,129 @@ body::after {
 
 @media (max-width: 768px) {
   .terminal-content { padding: 16px; }
+  
+  /* Mobile-specific improvements */
+  body {
+    font-size: 14px;
+  }
+  
+  .terminal-window {
+    margin-bottom: 16px;
+  }
+  
+  .terminal-header {
+    padding: 8px 12px;
+  }
+  
+  .terminal-title {
+    font-size: 10px;
+  }
+  
+  .prompt {
+    margin: 12px 0;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .terminal-content { padding: 12px; }
+  
+  body {
+    font-size: 13px;
+  }
+  
+  .terminal-window {
+    margin-bottom: 12px;
+  }
+  
+  .terminal-header {
+    padding: 6px 10px;
+  }
+  
+  .terminal-title {
+    font-size: 9px;
+  }
+  
+  .prompt {
+    margin: 8px 0;
+    font-size: 12px;
+  }
+  
+  .status-badge {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .terminal-window:hover {
+    transform: none;
+  }
+  
+  .terminal-window:active {
+    transform: scale(0.98);
+  }
+  
+  /* Larger touch targets */
+  button, .status-badge, .prompt {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  *:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Additional mobile optimizations */
+@media (max-width: 768px) {
+  /* Prevent text selection on UI elements */
+  .terminal-header, .terminal-dots, .terminal-title,
+  button, .status-badge, .prompt {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Improve scrolling performance */
+  .terminal-window, .terminal-content {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Optimize animations for mobile */
+  * {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* Landscape mobile optimizations */
+@media (max-width: 768px) and (orientation: landscape) {
+  .terminal-content {
+    padding: 8px;
+  }
+  
+  .terminal-header {
+    padding: 4px 8px;
+  }
+  
+  .terminal-title {
+    font-size: 9px;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .terminal-window {
+    border-width: 1px;
+  }
+  
+  .terminal-dot {
+    border-width: 1px;
+  }
 }

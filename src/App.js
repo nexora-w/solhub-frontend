@@ -26,6 +26,11 @@ const MainContent = styled.div`
   z-index: 3;
   min-height: 0;
   margin-top: 10px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    margin-top: 5px;
+  }
 `;
 
 const MatrixBackground = styled.div`
@@ -69,6 +74,8 @@ function App() {
   const [currentChannel, setCurrentChannel] = useState('general');
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [showFAQ, setShowFAQ] = useState(true);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Function to fetch messages for a specific channel
   const fetchMessages = async (channel) => {
@@ -210,6 +217,20 @@ function App() {
     return () => {
       newSocket.close();
     };
+  }, []);
+
+  // Handle window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setSidebarCollapsed(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Fetch messages when component mounts
@@ -370,6 +391,10 @@ function App() {
     setCurrentChannel(voiceCallId);
   };
 
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   return (
     <AppContainer>
       <MatrixBackground id="matrixBg" />
@@ -383,13 +408,20 @@ function App() {
         onShowFAQ={() => setShowFAQ(true)}
       />
       <MainContent>
-        <Sidebar 
-          currentChannel={currentChannel}
-          onChannelChange={setCurrentChannel}
-          connectedUsers={connectedUsers}
-          onShowFAQ={() => setShowFAQ(true)}
-          onVoiceCallClick={handleVoiceCallClick}
-        />
+        {(!isMobile || !sidebarCollapsed) && (
+          <Sidebar 
+            currentChannel={currentChannel}
+            onChannelChange={(channel) => {
+              setCurrentChannel(channel);
+              if (isMobile) {
+                setSidebarCollapsed(true);
+              }
+            }}
+            connectedUsers={connectedUsers}
+            onShowFAQ={() => setShowFAQ(true)}
+            onVoiceCallClick={handleVoiceCallClick}
+          />
+        )}
         <ChatArea 
           messages={messages}
           onSendMessage={handleSendMessage}
@@ -397,6 +429,9 @@ function App() {
           user={user}
           currentChannel={currentChannel}
           isLoadingMessages={isLoadingMessages}
+          isMobile={isMobile}
+          sidebarCollapsed={sidebarCollapsed}
+          onToggleSidebar={toggleSidebar}
         />
       </MainContent>
       

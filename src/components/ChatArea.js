@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import { FaPaperPlane, FaSmile, FaPaperclip, FaBroadcastTower } from 'react-icons/fa';
+import { FaPaperPlane, FaSmile, FaPaperclip, FaBroadcastTower, FaBars } from 'react-icons/fa';
+import EmojiPicker from 'emoji-picker-react';
 
 const ChatContainer = styled.div`
   flex: 1;
@@ -14,6 +15,16 @@ const ChatContainer = styled.div`
   box-shadow: var(--glow-cyan);
   position: relative;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    margin: 0 10px 10px 10px;
+    height: calc(100% - 10px);
+  }
+
+  @media (max-width: 480px) {
+    margin: 0 5px 5px 5px;
+    height: calc(100% - 5px);
+  }
 `;
 
 const TerminalHeader = styled.div`
@@ -23,6 +34,14 @@ const TerminalHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+
+  @media (max-width: 768px) {
+    padding: 8px 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 6px 10px;
+  }
 `;
 
 const TerminalDots = styled.div`
@@ -108,6 +127,16 @@ const MessagesContainer = styled.div`
   /* Firefox scrollbar styling */
   scrollbar-width: thin;
   scrollbar-color: var(--border-neon) var(--bg-secondary);
+
+  @media (max-width: 768px) {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
 `;
 
 const Message = styled.div`
@@ -161,6 +190,18 @@ const Message = styled.div`
     }};
     transform: translateX(4px);
   }
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    padding: 10px;
+    min-height: 60px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.4rem;
+    padding: 8px;
+    min-height: 50px;
+  }
 `;
 
 const MessageAvatar = styled.div`
@@ -176,6 +217,18 @@ const MessageAvatar = styled.div`
   font-size: 0.9rem;
   flex-shrink: 0;
   box-shadow: 0 0 10px currentColor;
+
+  @media (max-width: 768px) {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 480px) {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
 `;
 
 const MessageContent = styled.div`
@@ -238,6 +291,14 @@ const InputContainer = styled.div`
   background: var(--bg-elevated);
   position: relative;
   z-index: 3;
+
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem 0.75rem;
+  }
 `;
 
 const InputWrapper = styled.div`
@@ -253,6 +314,16 @@ const InputWrapper = styled.div`
   &:focus-within {
     border-color: var(--border-neon);
     box-shadow: var(--glow-green);
+  }
+
+  @media (max-width: 768px) {
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.4rem;
+    padding: 0.3rem 0.5rem;
   }
 `;
 
@@ -315,6 +386,8 @@ const SendButton = styled.button`
   justify-content: center;
   transition: all 0.3s ease;
   text-shadow: var(--glow-green);
+  min-height: 44px;
+  min-width: 44px;
 
   &:hover {
     box-shadow: var(--glow-green);
@@ -326,6 +399,18 @@ const SendButton = styled.button`
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.6rem;
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    min-height: 36px;
+    min-width: 36px;
   }
 `;
 
@@ -342,6 +427,8 @@ const BroadcastButton = styled.button`
   transition: all 0.3s ease;
   text-shadow: var(--glow-magenta);
   margin-left: 0.5rem;
+  min-height: 44px;
+  min-width: 44px;
 
   &:hover {
     box-shadow: var(--glow-magenta);
@@ -353,6 +440,20 @@ const BroadcastButton = styled.button`
     cursor: not-allowed;
     transform: none;
     box-shadow: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0.6rem;
+    margin-left: 0.25rem;
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    margin-left: 0.2rem;
+    min-height: 36px;
+    min-width: 36px;
   }
 `;
 
@@ -387,11 +488,59 @@ const LoadingSpinner = styled.div`
   }
 `;
 
-function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages }) {
+const MobileMenuButton = styled.button`
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-cyan);
+  color: var(--fg-primary);
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  margin-left: auto;
+  min-height: 36px;
+  min-width: 36px;
+
+  &:hover {
+    border-color: var(--border-neon);
+    box-shadow: var(--glow-cyan);
+  }
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
+
+const EmojiPickerContainer = styled.div`
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 8px;
+  z-index: 1000;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-cyan);
+  border-radius: 8px;
+  box-shadow: var(--glow-cyan);
+  overflow: hidden;
+
+  @media (max-width: 768px) {
+    right: -50px;
+  }
+
+  @media (max-width: 480px) {
+    right: -100px;
+  }
+`;
+
+function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages, isMobile, sidebarCollapsed, onToggleSidebar }) {
   const [messageText, setMessageText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const emojiPickerRef = useRef(null);
 
   // Format wallet address for display
   const formatWalletAddress = (address) => {
@@ -415,6 +564,23 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle click outside to close emoji picker
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   const handleSendMessage = () => {
     if (messageText.trim() && user) {
@@ -462,6 +628,15 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
     }, 1000);
   };
 
+  const handleEmojiClick = () => {
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+
+  const handleEmojiSelect = (emojiData) => {
+    setMessageText(prev => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
+  };
+
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString([], { 
       hour: '2-digit', 
@@ -495,6 +670,11 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
           <TerminalDot />
         </TerminalDots>
         <TerminalTitle>CHAT_TERMINAL</TerminalTitle>
+        {isMobile && (
+          <MobileMenuButton onClick={onToggleSidebar}>
+            <FaBars />
+          </MobileMenuButton>
+        )}
       </TerminalHeader>
       
       <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid var(--border-cyan)', background: 'var(--bg-elevated)' }}>
@@ -609,9 +789,28 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
               onKeyPress={handleKeyPress}
               disabled={!user}
             />
-            <EmojiButton>
-              <FaSmile />
-            </EmojiButton>
+            <div style={{ position: 'relative' }} ref={emojiPickerRef}>
+              <EmojiButton onClick={handleEmojiClick}>
+                <FaSmile />
+              </EmojiButton>
+              {showEmojiPicker && (
+                <EmojiPickerContainer>
+                  <EmojiPicker
+                    onEmojiClick={handleEmojiSelect}
+                    theme="dark"
+                    width={300}
+                    height={400}
+                    searchDisabled={false}
+                    skinTonesDisabled={false}
+                    previewConfig={{
+                      showPreview: true,
+                      defaultEmoji: '1f60a',
+                      defaultCaption: 'Choose your emoji!'
+                    }}
+                  />
+                </EmojiPickerContainer>
+              )}
+            </div>
             <SendButton 
               onClick={handleSendMessage}
               disabled={!messageText.trim() || !user}
