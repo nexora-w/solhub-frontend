@@ -5,6 +5,7 @@ import {
   FaQuestionCircle,
   FaCheck,
 } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 import { useWalletConnection } from "../hooks/useWalletConnection";
 import WalletModal from "./WalletModal";
 
@@ -88,7 +89,7 @@ const ConnectWalletButton = styled.button`
   }
 `;
 
-const FAQButton = styled.button`
+const TwitterButton = styled.button`
   background: var(--bg-elevated);
   border: 1px solid var(--border-cyan);
   color: var(--fg-primary);
@@ -319,7 +320,7 @@ const CloseButton = styled.button`
   }
 `;
 
-function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
+function Header({ user, onUserLogin, connectedUsers }) {
   const {
     walletAddress,
     walletBalance,
@@ -500,10 +501,12 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
             justifyContent: isMobile ? "center" : "flex-end",
             width: isMobile ? "100%" : "auto"
           }}>
-            <FAQButton onClick={onShowFAQ}>
-              <FaQuestionCircle />
-              FAQ
-            </FAQButton>
+            <TwitterButton 
+              onClick={() => window.open('https://x.com/userhubsol', '_blank')}
+              title="Follow us on X (Twitter)"
+            >
+              <FaXTwitter />
+            </TwitterButton>
             {isConnected && walletAddress ? (
               <WalletInfo>
                 <WalletAddress>{formatAddress(walletAddress)}</WalletAddress>
