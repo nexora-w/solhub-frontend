@@ -843,7 +843,10 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
               </WelcomeSubtitle>
             </WelcomeMessage>
           ) : (
-            filteredMessages.map((message) => (
+            filteredMessages.map((message) => {
+              // Debug: Log message properties to see what's available
+              console.log('Message properties:', Object.keys(message), 'Role:', message.role);
+              return (
             <Message key={message.id} $isBroadcast={message.isBroadcast} $isTemporary={message.isTemporary} $isError={message.isError}>
               <MessageAvatar>
                 {message.isError ? '!' : 'W'}
@@ -853,7 +856,7 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
                   <MessageUsername>
                     <span className={message.isError ? "ansi-red" : (message.isBroadcast ? "ansi-magenta" : "ansi-green")}>
                       {!message.isError && formatWalletAddress(message.walletAddress || message.username)}
-                      {/* {!message.isError && !message.isBroadcast && isDeveloper(user) && <span className="ansi-cyan"> [dev]</span>} */}
+                      {!message.isError && !message.isBroadcast && (message.role === 'developer' || message.role === 'admin' || message.role === 'dev') && <span className="ansi-cyan"> [dev]</span>}
                       {message.isBroadcast && <span className="ansi-magenta"> [BROADCAST]</span>}
                       {message.isTemporary && <span className="ansi-yellow"> [SENDING...]</span>}
                       {message.isError && <span className="ansi-red"> [ERROR]</span>}
@@ -885,7 +888,8 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
                 </MessageText>
               </MessageContent>
             </Message>
-          ))
+            );
+            })
           );
         })()}
         <div ref={messagesEndRef} />
