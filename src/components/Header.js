@@ -188,6 +188,7 @@ const ContractAddressContainer = styled.div`
   border-radius: 4px;
   transition: all 0.3s ease;
   flex-wrap: wrap;
+  position: relative;
 `;
 
 const ContractAddressText = styled.span`
@@ -197,6 +198,9 @@ const ContractAddressText = styled.span`
   font-family: "Courier New", monospace;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 
   &:hover {
     color: var(--fg-primary);
@@ -211,6 +215,15 @@ const ContractAddressText = styled.span`
   @media (max-width: 480px) {
     font-size: 11px;
   }
+`;
+
+const CheckMark = styled.span`
+  color: var(--fg-success);
+  font-size: 12px;
+  opacity: ${props => props.show ? 1 : 0};
+  transition: opacity 0.3s ease;
+  display: flex;
+  align-items: center;
 `;
 
 const ContractAddressLabel = styled.span`
@@ -449,6 +462,9 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
                 title="Click to copy contract address"
               >
                 7tMo5tAHNUUiD3HWpaH4XkzaKxg8pSpi8SycbZ2546Fc
+                <CheckMark show={copySuccess}>
+                  <FaCheck />
+                </CheckMark>
               </ContractAddressText>
             </ContractAddressContainer>
           </div>
@@ -522,12 +538,6 @@ function Header({ user, onUserLogin, connectedUsers, onShowFAQ }) {
         </ErrorMessage>
       )}
 
-      {copySuccess && (
-        <CopySuccessMessage>
-          <FaCheck />
-          Contract address copied!
-        </CopySuccessMessage>
-      )}
 
       <WalletModal
         isOpen={isModalOpen}

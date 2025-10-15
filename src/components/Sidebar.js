@@ -495,12 +495,12 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
     fetchVoiceChannels();
   }, []);
 
-  // Format wallet address for display
+  // Format wallet address for display - minimized version
   const formatWalletAddress = (address) => {
     if (!address) return '';
     // Check if it's a wallet address (44 characters, base58)
     if (address.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(address)) {
-      return `${address.slice(0, 4)}...${address.slice(-4)}`;
+      return `${address.slice(0, 3)}...${address.slice(-3)}`;
     }
     return address;
   };
@@ -663,26 +663,6 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
             ))
           )}
         </VoiceCallsSection>
-
-        {connectedUsers.length > 0 && (
-          <OnlineUsers>
-            <OnlineUsersTitle>
-              <FaUsers />
-              ONLINE_USERS
-            </OnlineUsersTitle>
-            {connectedUsers.map(user => (
-              <UserItem key={user.id}>
-                <UserAvatar>
-                  {isWalletAddress(user.username) ? 'W' : user.username.charAt(0).toUpperCase()}
-                </UserAvatar>
-                <span className="ansi-green">
-                  {isWalletAddress(user.username) ? formatWalletAddress(user.username) : user.username}
-                  {isWalletAddress(user.username) && <span className="ansi-cyan"> [W]</span>}
-                </span>
-              </UserItem>
-            ))}
-          </OnlineUsers>
-        )}
       </ScrollableContent>
 
       {showCreateChannelModal && (

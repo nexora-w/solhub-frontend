@@ -541,18 +541,18 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
   const [channels, setChannels] = useState([]);
   const [voiceChannels, setVoiceChannels] = useState([]);
   const [messageText, setMessageText] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const [typingUsers, setTypingUsers] = useState([]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const emojiPickerRef = useRef(null);
 
-  // Format wallet address for display
+  // Format wallet address for display - minimized version
   const formatWalletAddress = (address) => {
     if (!address) return '';
     // Check if it's a wallet address (44 characters, base58)
     if (address.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(address)) {
-      return `${address.slice(0, 4)}...${address.slice(-4)}`;
+      return `${address.slice(0, 3)}...${address.slice(-3)}`;
     }
     return address;
   };
@@ -560,6 +560,11 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
   // Check if username is a wallet address
   const isWalletAddress = (username) => {
     return username && username.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(username);
+  };
+
+  // Check if user is a developer (can send broadcast messages)
+  const isDeveloper = (user) => {
+    return user && (user.role === 'developer' || user.role === 'admin' || user.role === 'dev');
   };
 
   const scrollToBottom = () => {
@@ -629,17 +634,59 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
     };
   }, [socket]);
 
+  // Listen for typing indicators from other users
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUserTyping = (data) => {
+      // Only show typing indicators for the current channel
+      if (data.channel === currentChannel) {
+        setTypingUsers(prev => {
+          if (data.isTyping) {
+            // Add user to typing list if not already there
+            const userExists = prev.find(u => u.userId === data.userId);
+            if (!userExists) {
+              return [...prev, { userId: data.userId, username: data.username }];
+            }
+            return prev;
+          } else {
+            // Remove user from typing list
+            return prev.filter(u => u.userId !== data.userId);
+          }
+        });
+      }
+    };
+
+    socket.on('userTyping', handleUserTyping);
+
+    return () => {
+      socket.off('userTyping', handleUserTyping);
+    };
+  }, [socket, currentChannel]);
+
   const handleSendMessage = () => {
     if (messageText.trim() && user) {
+      // Stop typing indicator when sending message
+      if (socket) {
+        socket.emit('typing', { isTyping: false, channel: currentChannel });
+      }
+      clearTimeout(typingTimeoutRef.current);
+      
       onSendMessage(messageText.trim());
       setMessageText('');
     }
   };
 
   const handleBroadcastMessage = () => {
-    if (messageText.trim() && user) {
+    if (messageText.trim() && user && isDeveloper(user)) {
       // Show confirmation for broadcast
       if (window.confirm('Are you sure you want to broadcast this message to all channels?')) {
+        // Stop typing indicator when sending broadcast
+        if (socket) {
+          socket.emit('typing', { isTyping: false, channel: currentChannel });
+        }
+        clearTimeout(typingTimeoutRef.current);
+        
         onBroadcastMessage(messageText.trim());
         setMessageText('');
       }
@@ -650,8 +697,8 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (e.ctrlKey) {
-        // Direct broadcast without confirmation for keyboard shortcut
-        if (messageText.trim() && user) {
+        // Direct broadcast without confirmation for keyboard shortcut - only for developers
+        if (messageText.trim() && user && isDeveloper(user)) {
           onBroadcastMessage(messageText.trim());
           setMessageText('');
         }
@@ -664,15 +711,24 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
   const handleInputChange = (e) => {
     setMessageText(e.target.value);
     
-    // Typing indicator logic
-    if (!isTyping) {
-      setIsTyping(true);
+    // Send typing indicator to other users
+    if (socket && user && e.target.value.trim()) {
+      socket.emit('typing', { isTyping: true, channel: currentChannel });
+      
+      // Clear existing timeout
+      clearTimeout(typingTimeoutRef.current);
+      
+      // Set timeout to stop typing indicator
+      typingTimeoutRef.current = setTimeout(() => {
+        if (socket && user) {
+          socket.emit('typing', { isTyping: false, channel: currentChannel });
+        }
+      }, 1000);
+    } else if (socket && user && !e.target.value.trim()) {
+      // Stop typing if input is empty
+      socket.emit('typing', { isTyping: false, channel: currentChannel });
+      clearTimeout(typingTimeoutRef.current);
     }
-    
-    clearTimeout(typingTimeoutRef.current);
-    typingTimeoutRef.current = setTimeout(() => {
-      setIsTyping(false);
-    }, 1000);
   };
 
   const handleEmojiClick = () => {
@@ -716,6 +772,16 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
 
   const channelInfo = getChannelInfo(currentChannel);
   const isVoiceCallChannel = voiceChannels.some(vc => vc._id === currentChannel);
+
+  // Clear typing indicators when channel changes
+  useEffect(() => {
+    setTypingUsers([]);
+    // Stop typing indicator when changing channels
+    if (socket && user) {
+      socket.emit('typing', { isTyping: false, channel: currentChannel });
+    }
+    clearTimeout(typingTimeoutRef.current);
+  }, [currentChannel, socket, user]);
 
   return (
     <ChatContainer>
@@ -787,7 +853,7 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
                   <MessageUsername>
                     <span className={message.isError ? "ansi-red" : (message.isBroadcast ? "ansi-magenta" : "ansi-green")}>
                       {!message.isError && formatWalletAddress(message.walletAddress || message.username)}
-                      {!message.isError && <span className="ansi-cyan"> [{(message.role || 'user').toUpperCase()}]</span>}
+                      {!message.isError && !message.isBroadcast && isDeveloper(user) && <span className="ansi-cyan"> [dev]</span>}
                       {message.isBroadcast && <span className="ansi-magenta"> [BROADCAST]</span>}
                       {message.isTemporary && <span className="ansi-yellow"> [SENDING...]</span>}
                       {message.isError && <span className="ansi-red"> [ERROR]</span>}
@@ -825,9 +891,17 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
         <div ref={messagesEndRef} />
       </MessagesContainer>
 
-      {isTyping && (
+      {typingUsers.length > 0 && (
         <TypingIndicator>
-          <span className="ansi-yellow">Someone is typing</span><span className="cursor-blink">█</span>
+          <span className="ansi-yellow">
+            {typingUsers.length === 1 
+              ? `${formatWalletAddress(typingUsers[0].username)} is typing`
+              : typingUsers.length === 2
+              ? `${formatWalletAddress(typingUsers[0].username)} and ${formatWalletAddress(typingUsers[1].username)} are typing`
+              : `${formatWalletAddress(typingUsers[0].username)} and ${typingUsers.length - 1} others are typing`
+            }
+          </span>
+          <span className="cursor-blink">█</span>
         </TypingIndicator>
       )}
 
@@ -839,7 +913,7 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
             </AttachmentButton>
             <MessageInput
               type="text"
-              placeholder={user ? "Type a message... (Enter to send, Ctrl+Enter to broadcast)" : "Connect to start chatting..."}
+              placeholder={user ? (isDeveloper(user) ? "Type a message... (Enter to send, Ctrl+Enter to broadcast)" : "Type a message... (Enter to send)") : "Connect to start chatting..."}
               value={messageText}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
@@ -874,13 +948,15 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
             >
               <FaPaperPlane />
             </SendButton>
-            <BroadcastButton 
-              onClick={handleBroadcastMessage}
-              disabled={!messageText.trim() || !user}
-              title="Broadcast to all channels (Ctrl+Enter)"
-            >
-              <FaBroadcastTower />
-            </BroadcastButton>
+            {isDeveloper(user) && (
+              <BroadcastButton 
+                onClick={handleBroadcastMessage}
+                disabled={!messageText.trim() || !user}
+                title="Broadcast to all channels (Ctrl+Enter) - Developer only"
+              >
+                <FaBroadcastTower />
+              </BroadcastButton>
+            )}
           </InputWrapper>
         </InputContainer>
       )}
