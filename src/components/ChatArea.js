@@ -554,14 +554,12 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
     // Check if it's a wallet address (44 characters, base58)
     if (address.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(address)) {
       const formatted = `${address.slice(0, 4)}...${address.slice(-4)}`;
-      console.log('Formatted wallet address:', formatted);
       return formatted;
     }
     
     // If it's not a standard wallet address but looks like one, still format it
     if (address.length > 8 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(address)) {
       const formatted = `${address.slice(0, 4)}...${address.slice(-4)}`;
-      console.log('Formatted non-standard address:', formatted);
       return formatted;
     }
     
@@ -869,7 +867,7 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
                         const addressToFormat = message.walletAddress || message.username;
                         return formatWalletAddress(addressToFormat);
                       })()}
-                      {!message.isError && !message.isBroadcast && (message.role === 'developer' || message.role === 'admin' || message.role === 'dev') && <span className="ansi-cyan"> [dev]</span>}
+                      {!message.isError && !message.isBroadcast && (message.role === 'developer' || message.role === 'admin' || message.role === 'dev') && <span className="ansi-cyan"> [DEV]</span>}
                       {message.isBroadcast && <span className="ansi-magenta"> [BROADCAST]</span>}
                       {message.isTemporary && <span className="ansi-yellow"> [SENDING...]</span>}
                       {message.isError && <span className="ansi-red"> [ERROR]</span>}

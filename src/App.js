@@ -115,7 +115,6 @@ function App() {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/messages/all?limit=50`);
       if (response.ok) {
         const allMessages = await response.json();
-        console.log('Fetched all messages:', allMessages);
         
         // Flatten all messages into a single array
         const flattenedMessages = [];
