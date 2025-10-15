@@ -550,10 +550,22 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
   // Format wallet address for display - minimized version
   const formatWalletAddress = (address) => {
     if (!address) return '';
+    
     // Check if it's a wallet address (44 characters, base58)
     if (address.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(address)) {
-      return `${address.slice(0, 4)}...${address.slice(-4)}`;
+      const formatted = `${address.slice(0, 4)}...${address.slice(-4)}`;
+      console.log('Formatted wallet address:', formatted);
+      return formatted;
     }
+    
+    // If it's not a standard wallet address but looks like one, still format it
+    if (address.length > 8 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(address)) {
+      const formatted = `${address.slice(0, 4)}...${address.slice(-4)}`;
+      console.log('Formatted non-standard address:', formatted);
+      return formatted;
+    }
+    
+    console.log('Returning address as-is:', address);
     return address;
   };
 
@@ -853,7 +865,10 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
                 <MessageHeader>
                   <MessageUsername>
                     <span className={message.isError ? "ansi-red" : (message.isBroadcast ? "ansi-magenta" : "ansi-green")}>
-                      {!message.isError && formatWalletAddress(message.walletAddress || message.username)}
+                      {!message.isError && (() => {
+                        const addressToFormat = message.walletAddress || message.username;
+                        return formatWalletAddress(addressToFormat);
+                      })()}
                       {!message.isError && !message.isBroadcast && (message.role === 'developer' || message.role === 'admin' || message.role === 'dev') && <span className="ansi-cyan"> [dev]</span>}
                       {message.isBroadcast && <span className="ansi-magenta"> [BROADCAST]</span>}
                       {message.isTemporary && <span className="ansi-yellow"> [SENDING...]</span>}
