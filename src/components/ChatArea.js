@@ -552,7 +552,7 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
     if (!address) return '';
     // Check if it's a wallet address (44 characters, base58)
     if (address.length === 44 && /^[1-9A-HJ-NP-Za-km-z]+$/.test(address)) {
-      return `${address.slice(0, 3)}...${address.slice(-3)}`;
+      return `${address.slice(0, 4)}...${address.slice(-4)}`;
     }
     return address;
   };
@@ -844,8 +844,6 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
             </WelcomeMessage>
           ) : (
             filteredMessages.map((message) => {
-              // Debug: Log message properties to see what's available
-              console.log('Message properties:', Object.keys(message), 'Role:', message.role);
               return (
             <Message key={message.id} $isBroadcast={message.isBroadcast} $isTemporary={message.isTemporary} $isError={message.isError}>
               <MessageAvatar>
