@@ -175,11 +175,6 @@ const WalletAddress = styled.div`
   font-weight: 400;
 `;
 
-const WalletBalance = styled.div`
-  font-size: 11px;
-  color: var(--fg-primary);
-  font-weight: 600;
-`;
 
 const ContractAddressContainer = styled.div`
   display: flex;
@@ -323,7 +318,6 @@ const CloseButton = styled.button`
 function Header({ user, onUserLogin, connectedUsers }) {
   const {
     walletAddress,
-    walletBalance,
     isConnected,
     isConnecting,
     error,
@@ -367,15 +361,13 @@ function Header({ user, onUserLogin, connectedUsers }) {
         id: walletAddress,
         avatar: null,
         walletAddress: walletAddress,
-        balance: parseFloat(walletBalance) || 0,
         isWalletUser: true, // Flag to identify wallet-connected users
       };
 
       // Only send if user data has actually changed
       if (
         !lastSentUserData.current ||
-        lastSentUserData.current.username !== userData.username ||
-        lastSentUserData.current.balance !== userData.balance
+        lastSentUserData.current.username !== userData.username
       ) {
         lastSentUserData.current = userData;
         onUserLogin(userData);
@@ -384,7 +376,7 @@ function Header({ user, onUserLogin, connectedUsers }) {
       lastSentUserData.current = null;
       onUserLogin(null);
     }
-  }, [isConnected, walletAddress, walletBalance, onUserLogin]);
+  }, [isConnected, walletAddress, onUserLogin]);
 
   // Handle wallet connection
   const handleConnectWallet = async () => {
@@ -510,7 +502,6 @@ function Header({ user, onUserLogin, connectedUsers }) {
             {isConnected && walletAddress ? (
               <WalletInfo>
                 <WalletAddress>{formatAddress(walletAddress)}</WalletAddress>
-                <WalletBalance>{walletBalance} SOL</WalletBalance>
               </WalletInfo>
             ) : null}
             <ConnectWalletButton

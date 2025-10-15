@@ -12,7 +12,6 @@ export const useWallet = () => {
 
 export const WalletProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState(null);
-  const [walletBalance, setWalletBalance] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connection, setConnection] = useState(null);
@@ -54,7 +53,6 @@ export const WalletProvider = ({ children }) => {
             setPublicKey(response.publicKey);
             setWalletAddress(response.publicKey.toString());
             setIsConnected(true);
-            await fetchBalance(response.publicKey);
           }
         } catch (error) {
           // Wallet not connected, this is normal
@@ -66,17 +64,6 @@ export const WalletProvider = ({ children }) => {
     checkWalletConnection();
   }, []);
 
-  // Fetch wallet balance
-  const fetchBalance = useCallback(async (pubKey) => {
-    if (!connection || !pubKey) return;
-
-    try {
-      const balance = await connection.getBalance(pubKey);
-      setWalletBalance((balance / 1e9).toFixed(4)); // Convert lamports to SOL
-    } catch (error) {
-      console.error('Failed to fetch balance:', error);
-    }
-  }, [connection]);
 
   // Connect wallet
   const connectWallet = useCallback(async () => {
@@ -96,12 +83,9 @@ export const WalletProvider = ({ children }) => {
       // Clear the explicit disconnect flag since user is connecting
       localStorage.removeItem('wallet_explicitly_disconnected');
       
-      await fetchBalance(pubKey);
-      
       return {
         publicKey: pubKey,
-        address: pubKey.toString(),
-        balance: walletBalance
+        address: pubKey.toString()
       };
     } catch (error) {
       console.error('Failed to connect wallet:', error);
@@ -109,7 +93,7 @@ export const WalletProvider = ({ children }) => {
     } finally {
       setIsConnecting(false);
     }
-  }, [fetchBalance, walletBalance]);
+  }, []);
 
   // Disconnect wallet
   const disconnectWallet = useCallback(async () => {
@@ -120,7 +104,6 @@ export const WalletProvider = ({ children }) => {
       
       setPublicKey(null);
       setWalletAddress(null);
-      setWalletBalance(null);
       setIsConnected(false);
       
       // Set flag to prevent auto-reconnection on page refresh
@@ -171,7 +154,6 @@ export const WalletProvider = ({ children }) => {
   const value = {
     // State
     walletAddress,
-    walletBalance,
     isConnected,
     isConnecting,
     connection,
@@ -182,7 +164,6 @@ export const WalletProvider = ({ children }) => {
     disconnectWallet,
     signMessage,
     sendTransaction,
-    fetchBalance,
     formatAddress,
   };
 

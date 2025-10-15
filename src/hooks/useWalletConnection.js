@@ -52,7 +52,6 @@ const getBestWallet = () => {
 
 export const useWalletConnection = () => {
   const [walletAddress, setWalletAddress] = useState(null);
-  const [walletBalance, setWalletBalance] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connection, setConnection] = useState(null);
@@ -61,18 +60,6 @@ export const useWalletConnection = () => {
   const [currentWallet, setCurrentWallet] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch wallet balance
-  const fetchBalance = useCallback(async (pubKey) => {
-    if (!connection || !pubKey) return;
-
-    try {
-      const balance = await connection.getBalance(pubKey);
-      setWalletBalance((balance / 1e9).toFixed(4)); // Convert lamports to SOL
-    } catch (error) {
-      console.error('Failed to fetch balance:', error);
-      setError('Failed to fetch wallet balance');
-    }
-  }, [connection]);
 
   // Initialize Solana connection
   useEffect(() => {
@@ -144,7 +131,6 @@ export const useWalletConnection = () => {
           setPublicKey(response.publicKey);
           setWalletAddress(response.publicKey.toString());
           setIsConnected(true);
-          await fetchBalance(response.publicKey);
         }
       } catch (error) {
         // No existing connection, this is normal
@@ -154,7 +140,7 @@ export const useWalletConnection = () => {
     };
 
     checkExistingConnection();
-  }, [fetchBalance]);
+  }, []);
 
   // Open wallet selection modal
   const openWalletModal = useCallback(() => {
@@ -212,13 +198,9 @@ export const useWalletConnection = () => {
       localStorage.removeItem('wallet_explicitly_disconnected');
       console.log('🧹 Cleared explicit disconnect flag');
       
-      await fetchBalance(pubKey);
-      console.log('💰 Balance fetched successfully');
-      
       return {
         publicKey: pubKey,
         address: pubKey.toString(),
-        balance: walletBalance,
         walletName: wallet.name
       };
     } catch (error) {
@@ -247,7 +229,7 @@ export const useWalletConnection = () => {
       setIsConnecting(false);
       console.log('🏁 Wallet connection process completed');
     }
-  }, [fetchBalance, walletBalance]);
+  }, []);
 
   // Legacy connect wallet function (for backward compatibility)
   const connectWallet = useCallback(async () => {
@@ -272,7 +254,6 @@ export const useWalletConnection = () => {
       
       setPublicKey(null);
       setWalletAddress(null);
-      setWalletBalance(null);
       setIsConnected(false);
       setError(null);
       setCurrentWallet(null);
@@ -354,15 +335,13 @@ export const useWalletConnection = () => {
     
     console.log('🔗 Local isConnected state:', isConnected);
     console.log('🔑 Local walletAddress:', walletAddress);
-    console.log('💰 Local walletBalance:', walletBalance);
     console.log('🚫 Explicitly disconnected flag:', localStorage.getItem('wallet_explicitly_disconnected'));
     console.log('🔍 === END WALLET DEBUG ===');
-  }, [isConnected, walletAddress, walletBalance, currentWallet]);
+  }, [isConnected, walletAddress, currentWallet]);
 
   return {
     // State
     walletAddress,
-    walletBalance,
     isConnected,
     isConnecting,
     connection,
@@ -378,7 +357,6 @@ export const useWalletConnection = () => {
     disconnectWallet,
     signMessage,
     sendTransaction,
-    fetchBalance,
     formatAddress,
     clearError,
     debugWalletStatus,

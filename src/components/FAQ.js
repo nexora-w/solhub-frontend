@@ -322,7 +322,7 @@ const faqData = [
       },
       {
         question: "Do I need SOL tokens to use USERHUB?",
-        answer: "No, you don't need SOL tokens to chat and participate in discussions. However, having SOL in your wallet allows you to see your balance in the interface and may be required for future premium features."
+        answer: "No, you don't need SOL tokens to chat and participate in discussions. However, having SOL in your wallet may be required for future premium features."
       },
       {
         question: "Can I use USERHUB as a hub for my own coin or project?",

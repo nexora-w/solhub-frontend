@@ -43,7 +43,6 @@ const Status = styled.div`
 const WalletTest = () => {
   const {
     walletAddress,
-    walletBalance,
     isConnected,
     isConnecting,
     error,
@@ -76,7 +75,6 @@ const WalletTest = () => {
         <div>
           <div>Address: {formatAddress(walletAddress)}</div>
           <div>Username: {formatAddress(walletAddress)}</div>
-          <div>Balance: {walletBalance} SOL</div>
         </div>
       )}
       
