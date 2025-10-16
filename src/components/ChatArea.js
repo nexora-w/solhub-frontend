@@ -537,8 +537,7 @@ const EmojiPickerContainer = styled.div`
   }
 `;
 
-function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages, isMobile, sidebarCollapsed, onToggleSidebar, socket }) {
-  const [channels, setChannels] = useState([]);
+function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentChannel, isLoadingMessages, isMobile, sidebarCollapsed, onToggleSidebar, socket, channels = [] }) {
   const [voiceChannels, setVoiceChannels] = useState([]);
   const [messageText, setMessageText] = useState('');
   const [typingUsers, setTypingUsers] = useState([]);
@@ -602,30 +601,22 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
     };
   }, [showEmojiPicker]);
 
-  // Fetch channels and voice channels from API
+  // Fetch voice channels from API (channels are now passed as props)
   useEffect(() => {
-    const fetchChannels = async () => {
+    const fetchVoiceChannels = async () => {
       try {
-        const [channelsResponse, voiceChannelsResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/channels`),
-          fetch(`${API_BASE_URL}/api/voice-channels`)
-        ]);
-
-        if (channelsResponse.ok) {
-          const channelsData = await channelsResponse.json();
-          setChannels(channelsData);
-        }
+        const voiceChannelsResponse = await fetch(`${API_BASE_URL}/api/voice-channels`);
 
         if (voiceChannelsResponse.ok) {
           const voiceChannelsData = await voiceChannelsResponse.json();
           setVoiceChannels(voiceChannelsData);
         }
       } catch (error) {
-        console.error('Error fetching channel data:', error);
+        console.error('Error fetching voice channel data:', error);
       }
     };
 
-    fetchChannels();
+    fetchVoiceChannels();
   }, []);
 
   // Listen for new channel creation via socket
@@ -634,7 +625,7 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
 
     const handleChannelCreated = (newChannel) => {
       console.log('New channel created (ChatArea):', newChannel);
-      setChannels(prev => [...prev, newChannel]);
+      // Channels are now managed by parent component
     };
 
     socket.on('channelCreated', handleChannelCreated);
@@ -776,7 +767,23 @@ function ChatArea({ messages, onSendMessage, onBroadcastMessage, user, currentCh
       };
     }
 
-    // Fallback for unknown channels
+    // If channels haven't loaded yet, show the channel name with loading description
+    if (channels.length === 0) {
+      return { 
+        name: channelId ? channelId.toUpperCase() : 'LOADING...', 
+        description: 'Loading channel information...' 
+      };
+    }
+
+    // If channel not found but we have channels loaded, show the channel name anyway
+    if (channelId) {
+      return { 
+        name: channelId.toUpperCase(), 
+        description: 'Channel' 
+      };
+    }
+
+    // Final fallback
     return { name: 'UNKNOWN', description: 'Unknown channel' };
   };
 

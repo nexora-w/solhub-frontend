@@ -50,7 +50,8 @@ function App() {
   const [user, setUser] = useState(null);
   const [messages, setMessages] = useState([]);
   const [connectedUsers, setConnectedUsers] = useState([]);
-  const [currentChannel, setCurrentChannel] = useState('general');
+  const [currentChannel, setCurrentChannel] = useState('');
+  const [channels, setChannels] = useState([]);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const [showFAQ, setShowFAQ] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -130,6 +131,27 @@ function App() {
       console.error('Error fetching all messages:', error);
     } finally {
       setIsLoadingMessages(false);
+    }
+  };
+
+  // Function to fetch channels and set the first one as current
+  const fetchChannels = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/channels`);
+      if (response.ok) {
+        const channelsData = await response.json();
+        setChannels(channelsData);
+        
+        // Set the first channel as current if no channel is currently set
+        if (channelsData.length > 0 && !currentChannel) {
+          setCurrentChannel(channelsData[0].name);
+          console.log('Set first channel as current:', channelsData[0].name);
+        }
+      } else {
+        console.error('Failed to fetch channels');
+      }
+    } catch (error) {
+      console.error('Error fetching channels:', error);
     }
   };
 
@@ -220,8 +242,9 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch messages when component mounts
+  // Fetch channels and messages when component mounts
   useEffect(() => {
+    fetchChannels();
     fetchAllMessages();
   }, []);
 
@@ -383,6 +406,7 @@ function App() {
             onVoiceCallClick={handleVoiceCallClick}
             user={user}
             socket={socket}
+            channels={channels}
           />
         )}
         <ChatArea 
@@ -396,6 +420,7 @@ function App() {
           sidebarCollapsed={sidebarCollapsed}
           onToggleSidebar={toggleSidebar}
           socket={socket}
+          channels={channels}
         />
       </MainContent>
       

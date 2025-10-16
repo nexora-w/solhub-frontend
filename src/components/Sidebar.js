@@ -422,34 +422,12 @@ const SectionHeader = styled.div`
 // API base URL - you might want to move this to a config file
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
-function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, onVoiceCallClick, user, socket }) {
-  const [channels, setChannels] = useState([]);
+function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, onVoiceCallClick, user, socket, channels = [] }) {
   const [voiceChannels, setVoiceChannels] = useState([]);
-  const [isLoadingChannels, setIsLoadingChannels] = useState(true);
   const [isLoadingVoiceChannels, setIsLoadingVoiceChannels] = useState(true);
   const [showCreateChannelModal, setShowCreateChannelModal] = useState(false);
 
-  // Fetch channels from API
-  const fetchChannels = async () => {
-    try {
-      setIsLoadingChannels(true);
-      const response = await fetch(`${API_BASE_URL}/api/channels`);
-      if (response.ok) {
-        const data = await response.json();
-        setChannels(data);
-      } else {
-        console.error('Failed to fetch channels');
-      }
-    } catch (error) {
-      console.error('Error fetching channels:', error);
-    } finally {
-      setIsLoadingChannels(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchChannels();
-  }, []);
+  // Channels are now passed as props from parent component
 
   // Listen for new channel creation and deletion via socket
   useEffect(() => {
@@ -457,12 +435,12 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
 
     const handleChannelCreated = (newChannel) => {
       console.log('New channel created:', newChannel);
-      setChannels(prev => [...prev, newChannel]);
+      // Channels are now managed by parent component
     };
 
     const handleChannelDeleted = (deletedChannelId) => {
       console.log('Channel deleted:', deletedChannelId);
-      setChannels(prev => prev.filter(channel => channel._id !== deletedChannelId));
+      // Channels are now managed by parent component
     };
 
     socket.on('channelCreated', handleChannelCreated);
@@ -512,7 +490,7 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
 
   const handleChannelCreated = (newChannel) => {
     console.log('Channel created successfully:', newChannel);
-    fetchChannels(); // Refresh the channels list
+    // Channels are now managed by parent component
     // Optionally switch to the new channel
     if (onChannelChange) {
       onChannelChange(newChannel.name);
@@ -547,8 +525,7 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
 
       if (response.ok) {
         console.log('Channel deleted successfully');
-        // Remove from local state
-        setChannels(prev => prev.filter(channel => channel._id !== channelId));
+        // Channels are now managed by parent component
         
         // If the deleted channel was the current channel, switch to another channel
         if (currentChannel === channelName) {
@@ -616,7 +593,7 @@ function Sidebar({ currentChannel, onChannelChange, connectedUsers, onShowFAQ, o
           )}
 
           <ChannelList>
-            {isLoadingChannels ? (
+            {channels.length === 0 ? (
               <ChannelInfo>Loading channels...</ChannelInfo>
             ) : (
               channels.map(channel => (
