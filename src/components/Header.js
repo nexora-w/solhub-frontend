@@ -407,7 +407,7 @@ function Header({ user, onUserLogin, connectedUsers }) {
 
   // Handle copy contract address to clipboard
   const handleCopyContractAddress = async () => {
-    const contractAddress = "COMING SOON";
+    const contractAddress = "an4GkmSAp1USKddbS6vUVETmgmoCHNDQ1HeNhawpump";
     try {
       await navigator.clipboard.writeText(contractAddress);
       setCopySuccess(true);
@@ -454,7 +454,7 @@ function Header({ user, onUserLogin, connectedUsers }) {
                 onClick={handleCopyContractAddress}
                 title="Click to copy contract address"
               >
-                COMING SOON
+                an4GkmSAp1USKddbS6vUVETmgmoCHNDQ1HeNhawpump
                 <CheckMark show={copySuccess}>
                   <FaCheck />
                 </CheckMark>
